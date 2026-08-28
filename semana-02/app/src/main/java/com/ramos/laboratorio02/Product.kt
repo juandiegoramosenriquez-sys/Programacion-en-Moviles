@@ -14,5 +14,6 @@ abstract class Product(
 
     fun descripcion(): String = "$nombre - S/ $precio x $cantidad"
 
+
     abstract fun calcularDescuento(): Double
 }
