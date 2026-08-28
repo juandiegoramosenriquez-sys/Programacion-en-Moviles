@@ -22,6 +22,14 @@ fun calcularTotal(subtotal: Double, igv: Double): Double {
     return subtotal + igv
 }
 
+fun calcularDescuento(total: Double): Double {
+    return when {
+        total > 5000 -> total * 0.10
+        total > 3000 -> total * 0.05
+        else -> 0.0
+    }
+}
+
 fun mostrarDetalle(productos: List<Producto>) {
     println("--------- DETALLE DEL CARRITO ---------")
     var i = 1
@@ -32,6 +40,10 @@ fun mostrarDetalle(productos: List<Producto>) {
         i++
     }
     println("---------------------------------------")
+}
+
+fun buscarProducto(productos: List<Producto>, nombre: String): Producto? {
+    return productos.find { it.nombre.equals(nombre, ignoreCase = true) }
 }
 
 
@@ -66,12 +78,35 @@ fun main() {
     val igv = calcularIGV(subtotal)
     val total = calcularTotal(subtotal, igv)
 
+    val descuento = calcularDescuento(total)
+    val totalFinal = total - descuento
+
     println(String.format("%-18s: S/ %8.2f", "Subtotal", subtotal))
     println(String.format("%-18s: S/ %8.2f", "IGV (18%)", igv))
     println(String.format("%-18s: S/ %8.2f", "TOTAL A PAGAR", total))
 
+    if (descuento > 0) {
+        val pct = if (total > 5000) "10%" else "5%"
+        println(String.format("%-18s: S/ %8.2f", "Descuento ($pct)", descuento))
+        println(String.format("%-18s: S/ %8.2f", "TOTAL CON DESC.", totalFinal))
+    }
 
+    println()
+    val masCaro = carrito.maxByOrNull { it.precio }
+    if (masCaro != null) {
+        println("Producto mas caro: ${masCaro.nombre} " + String.format("(S/ %.2f)", masCaro.precio))
+    }
 
+    println()
+    println("--- ELIMINANDO 'MousePad' DEL CARRITO ---")
+    carrito.removeIf { it.nombre.equals("MousePad", ignoreCase = true) }
 
+    mostrarDetalle(carrito)
+    val nuevoSubtotal = calcularSubtotal(carrito)
+    val nuevoIgv = calcularIGV(nuevoSubtotal)
+    val nuevoTotal = calcularTotal(nuevoSubtotal, nuevoIgv)
+    println(String.format("%-18s: S/ %8.2f", "NUEVO TOTAL", nuevoTotal))
 }
+
+
 
