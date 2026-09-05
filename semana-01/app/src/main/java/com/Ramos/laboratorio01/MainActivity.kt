@@ -42,9 +42,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
             text = "Curso: Programación en Móviles",)
     }
 }
-
 @Preview(showBackground = true)
 @Composable
+
 fun GreetingPreview() {
     Laboratorio01Theme {
         Greeting("Juan Diego Ramos Enriquez")
