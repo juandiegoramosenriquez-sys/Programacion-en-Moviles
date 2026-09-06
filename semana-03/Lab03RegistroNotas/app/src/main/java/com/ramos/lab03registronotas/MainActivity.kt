@@ -38,6 +38,9 @@ import com.ramos.lab03registronotas.ui.theme.Lab03RegistroNotasTheme
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -158,8 +161,67 @@ fun PantallaNotas(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.outline
             )
         } else {
-            Text("(próximamente: aquí va la tarjeta de resultados)")
+            val ponderado = nota1 * listaCursos[0].peso + nota2 * listaCursos[1].peso +
+                    nota3 * listaCursos[2].peso + nota4 * listaCursos[3].peso
+
+            val finalRedondeado = ponderado.roundToInt()
+            val promedioFinal = if (redondear) finalRedondeado.toFloat() else ponderado
+
+            val (observacion, colorChip) = when {
+                promedioFinal >= 17f -> "EXCELENTE" to Color(0xFF1B5E20)
+                promedioFinal >= 13f -> "APROBADO" to Color(0xFF4CAF50)
+                promedioFinal >= 10f -> "EN RECUPERACIÓN" to Color(0xFFFFA000)
+                else -> "DESAPROBADO" to Color(0xFFD32F2F)
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Promedio ponderado: " + String.format("%.2f", ponderado))
+                    Text(
+                        text = "Promedio final: " +
+                                if (redondear) finalRedondeado.toString()
+                                else String.format("%.2f", promedioFinal),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    if (redondear) {
+                        Text(
+                            "(redondeado)",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(colorChip)
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(observacion, color = Color.White)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "✓ Promedio calculado correctamente",
+                color = Color(0xFF2E7D32)
+            )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = "Juan Diego Ramos Enriquez",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
     }
 }
 
