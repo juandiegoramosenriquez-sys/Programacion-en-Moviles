@@ -35,6 +35,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.ramos.lab03registronotas.ui.theme.Lab03RegistroNotasTheme
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Switch
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -78,6 +81,10 @@ fun PantallaNotas(modifier: Modifier = Modifier) {
     var nota3 by rememberSaveable { mutableStateOf(0f) }
     var nota4 by rememberSaveable { mutableStateOf(0f) }
 
+    var redondear by rememberSaveable { mutableStateOf(false) }
+    var confirmado by rememberSaveable { mutableStateOf(false) }
+    var mostrarResultado by rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -104,10 +111,55 @@ fun PantallaNotas(modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        FilaCurso(listaCursos[0], nota1) { nota1 = it }
-        FilaCurso(listaCursos[1], nota2) { nota2 = it }
-        FilaCurso(listaCursos[2], nota3) { nota3 = it }
-        FilaCurso(listaCursos[3], nota4) { nota4 = it }
+        FilaCurso(listaCursos[0], nota1) { nota1 = it; mostrarResultado = false }
+        FilaCurso(listaCursos[1], nota2) { nota2 = it; mostrarResultado = false }
+        FilaCurso(listaCursos[2], nota3) { nota3 = it; mostrarResultado = false }
+        FilaCurso(listaCursos[3], nota4) { nota4 = it; mostrarResultado = false }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Redondear promedio final", modifier = Modifier.weight(1f))
+            Switch(
+                checked = redondear,
+                onCheckedChange = { redondear = it; mostrarResultado = false }
+            )
+        }
+
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = confirmado,
+                onCheckedChange = { confirmado = it; mostrarResultado = false }
+            )
+            Text("Confirmo que las notas son correctas")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Button(
+            onClick = { mostrarResultado = true },
+            enabled = confirmado,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("CALCULAR PROMEDIO")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (!mostrarResultado) {
+            Text(
+                text = "Asigna las notas y confirma para calcular",
+                color = MaterialTheme.colorScheme.outline
+            )
+        } else {
+            Text("(próximamente: aquí va la tarjeta de resultados)")
+        }
     }
 }
 
