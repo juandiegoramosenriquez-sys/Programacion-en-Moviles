@@ -104,7 +104,12 @@ fun AppNavigation() {
                 arguments = listOf(navArgument("claseId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val claseId = backStackEntry.arguments?.getInt("claseId") ?: 0
-                DetalleClaseScreen(navController, claseId, onReservar = { reservas.add(0, it) })
+                DetalleClaseScreen(
+                    navController = navController,
+                    claseId = claseId,
+                    reservas = reservas,
+                    onReservar = { reservas.add(0, it) }
+                )
             }
 
             composable(
