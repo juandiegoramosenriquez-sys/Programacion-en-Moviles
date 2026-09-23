@@ -81,7 +81,14 @@ fun AppNavigation() {
             }
 
             composable(Screen.Reservas.route) {
-                ReservasScreen(reservas)
+                ReservasScreen(
+                    reservas = reservas,
+                    onCancelar = { reserva ->
+                        // Se reemplaza la reserva por una copia con estado "Cancelada"
+                        val indice = reservas.indexOf(reserva)
+                        if (indice >= 0) reservas[indice] = reserva.copy(estado = "Cancelada")
+                    }
+                )
             }
 
             composable(Screen.Rutinas.route) {
