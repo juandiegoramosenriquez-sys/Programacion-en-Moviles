@@ -34,7 +34,15 @@ fun AppNavigation() {
         }
 
         composable(Screen.MisCitas.route) {
-            MisCitasScreen(navController)
+            MisCitasScreen(
+                navController = navController,
+                citas = citas,
+                onCancelar = { cita ->
+                    // Se reemplaza la cita por una copia con estado CANCELADA
+                    val indice = citas.indexOfFirst { it.id == cita.id }
+                    if (indice >= 0) citas[indice] = cita.copy(estado = EstadoCita.CANCELADA)
+                }
+            )
         }
 
         composable(Screen.Historial.route) {
