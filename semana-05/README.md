@@ -1,73 +1,31 @@
 # Semana 05 – Navegación en Jetpack Compose
 
-**Curso:** Programación en Móviles  
-**Alumno:** Juan Diego Ramos Enriquez  
-**Docente:** Juan León S.  
-**Guía:** `GLAB-S05-JLEONS-2026-2.pdf`
+**Alumno:** Juan Diego Ramos Enriquez · **Docente:** Juan León S. · **Guía:** `GLAB-S05-JLEONS-2026-2.pdf`
 
 ---
 
-## Parte 1 – Navegación con la guía (sin IA)
+## Parte 1 – Navegación según la guía (sin IA)
 
-App con 4 pantallas conectadas con **Navigation Compose**: `NavHost`, rutas con `sealed class` y paso de argumentos tipados (`NavType.IntType`).
-
-### Flujo de navegación
+App de 4 pantallas con **Navigation Compose**: rutas con `sealed class`, `NavHost` y paso de argumento tipado (`NavType.IntType`) de la Lista al Detalle.
 
 ```
-HomeScreen ("home")
- ├── navigate("list")    → ListScreen ("list")
- │                          └── navigate("detail/{itemId}") → DetailScreen (recibe itemId: Int)
- └── navigate("profile") → ProfileScreen ("profile")
-                            └── navigate("home") { popUpTo("home") { inclusive = true } }
+Home ──► Lista ──► Detalle (itemId: Int)
+  └────► Perfil ──► Home (popUpTo inclusive)
 ```
 
-### Estructura del proyecto
-
-```
-com.tecsup.semanaapp
-├── navigation/
-│   ├── Screen.kt          → rutas con sealed class
-│   └── AppNavigation.kt   → NavHost con las 4 pantallas
-├── screens/
-│   ├── HomeScreen.kt
-│   ├── ListScreen.kt      → Scaffold + TopAppBar + LazyColumn
-│   ├── DetailScreen.kt    → Scaffold + TopAppBar + Card
-│   └── ProfileScreen.kt   → popUpTo para limpiar el back stack
-├── ui/theme/
-└── MainActivity.kt        → SemanaAppTheme { AppNavigation() }
-```
-
-### Dependencias agregadas
-
-```kotlin
-implementation("androidx.navigation:navigation-compose:2.7.7")
-implementation("androidx.compose.material:material-icons-core:1.7.8")
-```
-
-> **Nota:** la guía solo menciona `navigation-compose`, pero `material-icons-core` es necesaria para el ícono `Icons.AutoMirrored.Filled.ArrowBack` de la barra superior. En las versiones actuales de Compose, `material3` ya no la incluye.
-
-### Capturas – Parte 1
-
-<!-- Guarda las capturas en la carpeta semana-05/img/ con estos nombres -->
+> Además de `navigation-compose:2.7.7` se agregó `material-icons-core:1.7.8`, necesaria para el ícono de la flecha atrás.
 
 | Inicio | Lista | Detalle | Perfil |
 |:---:|:---:|:---:|:---:|
-| ![Inicio](img/parte1-home.png) | ![Lista](img/parte1-lista.png) | ![Detalle](img/parte1-detalle.png) | ![Perfil](img/parte1-perfil.png) |
+| <img src="img/parte1-home.png" width="180"> | <img src="img/parte1-lista.png" width="180"> | <img src="img/parte1-detalle.png" width="180"> | <img src="img/parte1-perfil.png" width="180"> |
 
 ---
 
-## Parte 2 – Implementación con prompt (con IA)
+## Parte 2 – Mejora con prompt (con IA – Gemini)
 
-Usando **Gemini** en Android Studio, se mejoró la presentación de la primera parte y se convirtió en un **Portal Académico** de 5 pantallas:
+Rediseño como **Portal Académico**: login con validación, bienvenida, directorio de alumnos, expediente académico y perfil con cambio de idioma (Español / English).
 
-- **Login** con validación (correo con formato válido y contraseña de mínimo 6 caracteres)
-- **Bienvenida** con degradado y accesos rápidos
-- **Directorio de Alumnos** (lista con paso de `id` al detalle)
-- **Expediente Académico** del alumno elegido
-- **Configuración de Perfil** con **cambio de idioma** Español / English
-
-> **Para ingresar:** cualquier correo con formato válido y una contraseña de 6 caracteres o más.  
-> Ejemplo: `diego.ramos@tecsup.edu.pe` / `123456`
+> **Para ingresar:** cualquier correo válido y contraseña de 6 caracteres o más (ej. `diego.ramos@tecsup.edu.pe` / `123456`).
 
 ### Prompt utilizado
 
@@ -185,32 +143,20 @@ Entrega archivos completos, uno por bloque de código con el nombre del archivo 
 Al final, una lista corta de archivos a CREAR, REEMPLAZAR y ELIMINAR (ListScreen.kt y DetailScreen.kt deben eliminarse, no dejarse vacíos).
 ```
 
-### Capturas – Parte 2
-
-**Login**
+### Capturas
 
 | Login vacío | Login con datos | Correo sin @ |
 |:---:|:---:|:---:|
-| <img src="img/img_7.png" width="230"> | <img src="img/img.png" width="230"> | <img src="img/img_1.png" width="230"> |
-
-**Navegación principal**
+| <img src="img/img_7.png" width="200"> | <img src="img/img.png" width="200"> | <img src="img/img_1.png" width="200"> |
 
 | Bienvenida | Directorio de Alumnos | Expediente Académico |
 |:---:|:---:|:---:|
-| <img src="img/img_2.png" width="230"> | <img src="img/img_3.png" width="230"> | <img src="img/img_4.png" width="230"> |
+| <img src="img/img_2.png" width="200"> | <img src="img/img_3.png" width="200"> | <img src="img/img_4.png" width="200"> |
 
-**Configuración de Perfil**
-
-| Información personal y académica | Preferencias: idioma y cerrar sesión |
+| Perfil | Preferencias (idioma) |
 |:---:|:---:|
-| <img src="img/img_5.png" width="230"> | <img src="img/img_6.png" width="230"> |
+| <img src="img/img_5.png" width="200"> | <img src="img/img_6.png" width="200"> |
 
 ---
 
-## Ramas en GitHub
-
-| Rama | Contenido |
-|---|---|
-| `main` | Parte 1 – navegación según la guía |
-| `semana05/Rama-manual-pdf` | Parte 1 – desarrollo sin IA (unida a `main`) |
-| `semana05/Rama-implementacion-prompt` | Parte 2 – Portal Académico con Gemini |
+**Ramas:** `semana05/Rama-manual-pdf` (Parte 1, unida a `main`) · `semana05/Rama-implementacion-prompt` (Parte 2)
