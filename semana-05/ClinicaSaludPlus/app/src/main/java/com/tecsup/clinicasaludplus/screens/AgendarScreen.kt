@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.tecsup.clinicasaludplus.model.DataSource
@@ -56,7 +57,11 @@ fun AgendarScreen(
                     FilterChip(
                         selected = fechaSeleccionada == fecha,
                         onClick = { fechaSeleccionada = fecha },
-                        label = { Text(fecha) }
+                        label = { Text(fecha) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MoradoClinica,
+                            selectedLabelColor = Color.White
+                        )
                     )
                 }
             }
@@ -69,7 +74,11 @@ fun AgendarScreen(
                     FilterChip(
                         selected = horaSeleccionada == hora,
                         onClick = { horaSeleccionada = hora },
-                        label = { Text(hora) }
+                        label = { Text(hora) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = MoradoClinica,
+                            selectedLabelColor = Color.White
+                        )
                     )
                 }
             }
@@ -84,7 +93,8 @@ fun AgendarScreen(
                     onConfirmar(doctor, fecha, hora)
                     navController.navigate(Screen.Confirmacion.createRoute(doctor.id, fecha, hora))
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MoradoClinica)
             ) {
                 Text("Confirmar cita")
             }
