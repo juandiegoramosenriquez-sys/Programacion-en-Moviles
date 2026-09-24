@@ -1,11 +1,11 @@
 package com.tecsup.semanaapp.navigation
 
-sealed class Screen(val route: String) {
-    object Login : Screen("login")
+sealed class Screen (val route: String) {
     object Home : Screen("home")
-    object StudentList : Screen("student_list")
-    object StudentDetail : Screen("student_detail/{id}") {
-        fun createRoute(id: Int): String = "student_detail/$id"
-    }
+    object List : Screen("list")
     object Profile : Screen("profile")
+    object Detail : Screen("detail/{itemId}"){
+        fun createRoute(itemId: Int): String = "detail/$itemId"
+    }
 }
+
