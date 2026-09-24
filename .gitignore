@@ -1,0 +1,14 @@
+# Archivos que Android Studio y Gradle generan solos en cada computadora.
+# No se suben para evitar conflictos al cambiar de rama.
+.idea/
+.gradle/
+.kotlin/
+build/
+local.properties
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Temporales de Word
+~$*
