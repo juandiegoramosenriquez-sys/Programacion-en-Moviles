@@ -159,8 +159,20 @@ fun AppNavigation() {
                     }
                 }
                 composable(Screen.Favoritos.route) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Pantalla: Favoritos")
+                    if (favoritos.isEmpty()) {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Aún no tienes favoritos")
+                        }
+                    } else {
+                        LazyColumn {
+                            items(favoritos) { producto ->
+                                ProductCard(
+                                    productName = producto,
+                                    esFavorito = true,
+                                    onFavoritoClick = { favoritos.remove(producto) }
+                                )
+                            }
+                        }
                     }
                 }
                 composable(Screen.Perfil.route) {
