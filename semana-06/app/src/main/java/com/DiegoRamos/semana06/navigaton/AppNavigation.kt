@@ -93,6 +93,12 @@ fun AppNavigation() {
                 NavigationDrawerItem(
                     label = { Text("Favoritos") },
                     icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
+                    badge = {
+                        // solo aparece si hay al menos 1 favorito
+                        if (favoritos.isNotEmpty()) {
+                            Badge { Text(favoritos.size.toString()) }
+                        }
+                    },
                     selected = currentRoute == Screen.Favoritos.route,
                     onClick = {
                         navController.navigate(Screen.Favoritos.route)
