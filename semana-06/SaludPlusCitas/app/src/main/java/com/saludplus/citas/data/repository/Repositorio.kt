@@ -113,7 +113,7 @@ object Repositorio {
     }
 
     fun obtenerCita(id: Int): Cita? {
-        return null
+        return citas.find { it.id == id }
     }
 
     fun citasDelUsuario(): List<Cita> {
