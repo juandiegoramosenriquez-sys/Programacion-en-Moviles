@@ -43,15 +43,20 @@ object Repositorio {
 
     var usuarioActual by mutableStateOf<Usuario?>(null)
 
-    fun registrarUsuario(usuario: Usuario): Boolean {
-        return false
+        fun registrarUsuario(usuario: Usuario): Boolean {
+        if (usuarios.any { it.correo == usuario.correo }) return false
+        usuarios.add(usuario)
+        usuarioActual = usuario
+        return true
     }
 
     fun iniciarSesion(correo: String, password: String): Boolean {
-        return false
+        usuarioActual = usuarios.find { it.correo == correo && it.password == password }
+        return usuarioActual != null
     }
 
     fun cerrarSesion() {
+        usuarioActual = null
     }
 
     fun buscarEspecialidades(texto: String): List<Especialidad> {
