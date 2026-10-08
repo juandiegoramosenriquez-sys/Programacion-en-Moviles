@@ -37,7 +37,11 @@ fun AppNavigation() {
 
         composable(Rutas.Registro.ruta) {
             RegistroScreen(
-                onRegistroExitoso = { navController.navigate(Rutas.Login.ruta) },
+                onRegistroExitoso = {
+                    navController.navigate(Rutas.Home.ruta) {
+                        popUpTo(Rutas.Splash.ruta) { inclusive = true }
+                    }
+                },
                 onVerTerminos = { navController.navigate(Rutas.Terminos.ruta) },
                 onBack = { navController.popBackStack() }
             )
