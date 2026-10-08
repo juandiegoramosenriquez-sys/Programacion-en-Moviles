@@ -5,11 +5,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,14 +25,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.model.Usuario
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
 import com.saludplus.citas.ui.components.BotonPrincipal
 import com.saludplus.citas.ui.components.CampoTexto
+import com.saludplus.citas.ui.theme.AzulPrimario
+import com.saludplus.citas.ui.theme.Rojo
+import com.saludplus.citas.ui.theme.TextoSecundario
 
 @Composable
 fun RegistroScreen(
@@ -44,22 +54,29 @@ fun RegistroScreen(
     var error by remember { mutableStateOf("") }
 
     Scaffold(
-        topBar = { BarraSuperior(titulo = "Registro", onBack = onBack) }
+        topBar = { BarraSuperior(titulo = "Crear cuenta", onBack = onBack) }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(24.dp)
+                .padding(horizontal = 24.dp, vertical = 8.dp)
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            CampoTexto(nombres, { nombres = it }, "Nombres")
-            CampoTexto(apellidos, { apellidos = it }, "Apellidos")
-            CampoTexto(dni, { dni = it }, "DNI")
-            CampoTexto(correo, { correo = it }, "Correo")
-            CampoTexto(celular, { celular = it }, "Celular")
-            CampoTexto(password, { password = it }, "Contraseña", PasswordVisualTransformation())
+            Text(
+                text = "Regístrate para agendar tus citas",
+                color = TextoSecundario,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            CampoTexto(nombres, { nombres = it }, "Nombres", icono = Icons.Default.Person)
+            CampoTexto(apellidos, { apellidos = it }, "Apellidos", icono = Icons.Default.Person)
+            CampoTexto(dni, { dni = it }, "DNI", icono = Icons.Default.AccountCircle)
+            CampoTexto(correo, { correo = it }, "Correo", icono = Icons.Default.Email)
+            CampoTexto(celular, { celular = it }, "Celular", icono = Icons.Default.Phone)
+            CampoTexto(password, { password = it }, "Contraseña", PasswordVisualTransformation(), Icons.Default.Lock)
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(
@@ -68,14 +85,15 @@ fun RegistroScreen(
                 )
                 Text("Acepto los ")
                 Text(
-                    text = "términos y condiciones",
-                    color = MaterialTheme.colorScheme.primary,
+                    text = "Términos y Condiciones",
+                    color = AzulPrimario,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable { onVerTerminos() }
                 )
             }
 
             if (error.isNotEmpty()) {
-                Text(error, color = Color.Red)
+                Text(error, color = Rojo)
             }
 
             BotonPrincipal(

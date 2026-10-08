@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -23,12 +25,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
+import com.saludplus.citas.ui.components.CirculoEmoji
+import com.saludplus.citas.ui.components.colorDeFondo
+import com.saludplus.citas.ui.theme.TextoSecundario
 
 @Composable
 fun EspecialidadesScreen(
@@ -51,32 +55,39 @@ fun EspecialidadesScreen(
             OutlinedTextField(
                 value = texto,
                 onValueChange = { texto = it },
-                label = { Text("Buscar especialidad") },
+                placeholder = { Text("Buscar especialidad...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
+                shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth()
             )
 
             if (lista.isEmpty()) {
-                Text("No se encontraron especialidades", color = Color.Gray)
+                Text("No se encontraron especialidades", color = TextoSecundario)
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(lista) { especialidad ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onEspecialidadClick(especialidad.id) }
+                                .clickable { onEspecialidadClick(especialidad.id) },
+                            shape = RoundedCornerShape(16.dp)
                         ) {
                             Row(
-                                modifier = Modifier.padding(16.dp),
+                                modifier = Modifier.padding(14.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
-                                Text(especialidad.icono, fontSize = 32.sp)
-                                Column {
-                                    Text(especialidad.nombre, fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                                    Text(especialidad.descripcion, color = Color.Gray)
+                                CirculoEmoji(especialidad.icono, colorDeFondo(especialidad.id))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(especialidad.nombre, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                    Text(especialidad.descripcion, color = TextoSecundario, fontSize = 14.sp)
                                 }
+                                Icon(
+                                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = null,
+                                    tint = TextoSecundario
+                                )
                             }
                         }
                     }
