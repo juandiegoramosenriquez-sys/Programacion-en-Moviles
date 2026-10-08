@@ -88,11 +88,28 @@ object Repositorio {
     }
 
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
-        return horariosBase
+        val ocupados = citas
+            .filter { it.medicoId == medicoId && it.fecha == fecha }
+            .map { it.hora }
+        return horariosBase.filter { it !in ocupados }
     }
 
     fun agendarCita(medicoId: Int, fecha: String, hora: String): Cita? {
-        return null
+        val ocupado = citas.any { it.medicoId == medicoId && it.fecha == fecha && it.hora == hora }
+        if (ocupado) return null
+
+        val medico = obtenerMedico(medicoId) ?: return null
+
+        val cita = Cita(
+            id = (citas.maxOfOrNull { it.id } ?: 0) + 1,
+            correoUsuario = usuarioActual?.correo ?: "",
+            especialidadId = medico.especialidadId,
+            medicoId = medicoId,
+            fecha = fecha,
+            hora = hora
+        )
+        citas.add(cita)
+        return cita
     }
 
     fun obtenerCita(id: Int): Cita? {
