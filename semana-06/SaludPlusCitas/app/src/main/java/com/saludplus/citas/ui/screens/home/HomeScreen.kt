@@ -140,10 +140,17 @@ fun HomeScreen (
                 }
             }
 
+            val proxima = Repositorio.citasDelUsuario().firstOrNull()
+
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Próxima cita", fontWeight = FontWeight.Bold)
-                    Text("No tienes citas próximas", color = Color.Gray)
+                    if (proxima == null) {
+                        Text("No tienes citas próximas", color = Color.Gray)
+                    } else {
+                        Text(Repositorio.obtenerMedico(proxima.medicoId)?.nombre ?: "-")
+                        Text(" ${proxima.fecha}    ${proxima.hora}", color = Color.Gray)
+                    }
                 }
             }
         }

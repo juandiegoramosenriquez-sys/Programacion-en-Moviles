@@ -117,7 +117,9 @@ object Repositorio {
     }
 
     fun citasDelUsuario(): List<Cita> {
-        return emptyList()
+        return citas
+            .filter { it.correoUsuario == usuarioActual?.correo }
+            .sortedWith(compareBy({ it.fecha }, { it.hora }))
     }
 
     fun cancelarCita(id: Int): Boolean {
