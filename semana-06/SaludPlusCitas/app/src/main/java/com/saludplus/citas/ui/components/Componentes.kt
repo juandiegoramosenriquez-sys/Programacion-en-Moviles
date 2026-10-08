@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,7 +22,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,30 +47,6 @@ import com.saludplus.citas.ui.theme.RojoClaro
 import com.saludplus.citas.ui.theme.TextoPrincipal
 import com.saludplus.citas.ui.theme.TextoSecundario
 import com.saludplus.citas.ui.theme.VerdeClaro
-
-@Composable
-fun PantallaEnConstruccion(
-    titulo: String,
-    botones: List<Pair<String, () -> Unit>> = emptyList(),
-    onBack: (() -> Unit)? = null
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = titulo, style = MaterialTheme.typography.headlineSmall)
-        Text(text = "En construcción")
-        botones.forEach { (texto, accion) ->
-            Button(onClick = accion, modifier = Modifier.fillMaxWidth()) { Text(texto) }
-        }
-        if (onBack != null) {
-            OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) { Text("Atrás") }
-        }
-    }
-}
 
 @Composable
 fun BotonPrincipal(

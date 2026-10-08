@@ -11,7 +11,16 @@ import com.saludplus.citas.data.model.Usuario
 
 object Repositorio {
 
-    val usuarios = mutableStateListOf<Usuario>()
+    val usuarios = mutableStateListOf(
+        Usuario(
+            nombres = "Paciente",
+            apellidos = "Demo",
+            dni = "12345678",
+            correo = "demo@saludplus.com",
+            celular = "999999999",
+            password = "123456"
+        )
+    )
 
     val especialidades = mutableStateListOf(
         Especialidad(1, "Medicina General", "Consulta general y chequeos", "🩺"),
@@ -43,15 +52,15 @@ object Repositorio {
 
     var usuarioActual by mutableStateOf<Usuario?>(null)
 
-        fun registrarUsuario(usuario: Usuario): Boolean {
-        if (usuarios.any { it.correo == usuario.correo }) return false
+    fun registrarUsuario(usuario: Usuario): Boolean {
+        if (usuarios.any { it.correo.equals(usuario.correo, ignoreCase = true) }) return false
         usuarios.add(usuario)
         usuarioActual = usuario
         return true
     }
 
     fun iniciarSesion(correo: String, password: String): Boolean {
-        usuarioActual = usuarios.find { it.correo == correo && it.password == password }
+        usuarioActual = usuarios.find { it.correo.equals(correo, ignoreCase = true) && it.password == password }
         return usuarioActual != null
     }
 
