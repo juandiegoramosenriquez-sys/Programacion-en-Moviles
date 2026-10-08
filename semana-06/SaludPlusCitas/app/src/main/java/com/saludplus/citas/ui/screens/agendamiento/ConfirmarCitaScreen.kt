@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
 import com.saludplus.citas.ui.components.BotonPrincipal
+import com.saludplus.citas.ui.components.fechaEnTexto
 
 @Composable
 fun ConfirmarCitaScreen(
@@ -55,7 +56,7 @@ fun ConfirmarCitaScreen(
                 ) {
                     FilaResumen("Especialidad", especialidad?.nombre ?: "-")
                     FilaResumen("Médico", medico?.nombre ?: "-")
-                    FilaResumen("Fecha", fecha)
+                    FilaResumen("Fecha", fechaEnTexto(fecha))
                     FilaResumen("Hora", hora)
                     FilaResumen("Paciente", Repositorio.usuarioActual?.nombres ?: "-")
                 }

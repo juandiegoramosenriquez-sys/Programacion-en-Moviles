@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
+import com.saludplus.citas.ui.components.fechaEnTexto
 
 @Composable
 fun DetalleCitaScreen(
@@ -54,7 +55,7 @@ fun DetalleCitaScreen(
                 ) {
                     FilaDetalle("Especialidad", especialidad?.nombre ?: "-")
                     FilaDetalle("Médico", medico?.nombre ?: "-")
-                    FilaDetalle("Fecha", cita?.fecha ?: "-")
+                    FilaDetalle("Fecha", cita?.fecha?.let { fechaEnTexto(it) } ?: "-")
                     FilaDetalle("Hora", cita?.hora ?: "-")
                 }
             }

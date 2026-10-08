@@ -19,13 +19,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
+import com.saludplus.citas.ui.components.fechaEnTexto
 
 @Composable
 fun NotificacionesScreen(
     onBack: () -> Unit
 ) {
     val avisos = Repositorio.citasDelUsuario().map {
-        "Recordatorio: cita el ${it.fecha} a las ${it.hora}"
+        "Recordatorio: cita el ${fechaEnTexto(it.fecha).lowercase()} a las ${it.hora}"
     }
 
     Scaffold(
