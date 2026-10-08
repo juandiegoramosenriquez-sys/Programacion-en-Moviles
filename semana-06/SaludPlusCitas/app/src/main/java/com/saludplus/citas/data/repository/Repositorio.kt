@@ -123,6 +123,6 @@ object Repositorio {
     }
 
     fun cancelarCita(id: Int): Boolean {
-        return false
+        return citas.removeIf { it.id == id }
     }
 }
