@@ -33,9 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saludplus.citas.data.model.Especialidad
 import com.saludplus.citas.data.repository.Repositorio
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+
 
 @Composable
-fun HomeScreen(
+fun HomeScreen (
     onAgendarCita: () -> Unit,
     onEspecialidadClick: (Int) -> Unit,
     onNotificaciones: () -> Unit,
@@ -45,7 +51,36 @@ fun HomeScreen(
 ) {
     val nombre = Repositorio.usuarioActual?.nombres ?: "Paciente"
 
-    Scaffold { padding ->
+    Scaffold (
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = true,
+                    onClick = { },
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Inicio") },
+                    label = { Text("Inicio") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onMisCitas,
+                    icon = { Icon(Icons.Default.DateRange, contentDescription = "Citas") },
+                    label = { Text("Citas") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onResultados,
+                    icon = { Icon(Icons.Default.List, contentDescription = "Resultados") },
+                    label = { Text("Resultados") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onPerfil,
+                    icon = { Icon(Icons.Default.Person, contentDescription = "Perfil") },
+                    label = { Text("Perfil") }
+                )
+            }
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
