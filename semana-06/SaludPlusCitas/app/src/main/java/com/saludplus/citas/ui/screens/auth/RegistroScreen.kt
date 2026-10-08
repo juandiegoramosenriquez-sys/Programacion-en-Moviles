@@ -103,7 +103,7 @@ fun RegistroScreen(
                         nombres.isBlank() || apellidos.isBlank() || dni.isBlank() ||
                                 correo.isBlank() || celular.isBlank() || password.isBlank() ->
                             "Completa todos los campos"
-                        !correo.contains("@") -> "El correo no es válido"
+                        !correo.trim().contains("@") -> "El correo no es válido"
                         dni.length != 8 || !dni.all { it.isDigit() } -> "El DNI debe tener 8 dígitos"
                         password.length < 6 -> "La contraseña debe tener al menos 6 caracteres"
                         !aceptaTerminos -> "Debes aceptar los términos y condiciones"
@@ -116,7 +116,7 @@ fun RegistroScreen(
                                 nombres = nombres,
                                 apellidos = apellidos,
                                 dni = dni,
-                                correo = correo,
+                                correo = correo.trim(),
                                 celular = celular,
                                 password = password
                             )

@@ -84,7 +84,7 @@ fun LoginScreen(
                 onClick = {
                     if (correo.isBlank() || password.isBlank()) {
                         error = "Completa todos los campos"
-                    } else if (Repositorio.iniciarSesion(correo, password)) {
+                    } else if (Repositorio.iniciarSesion(correo.trim(), password)) {
                         onLoginExitoso()
                     } else {
                         error = "Correo o contraseña incorrectos"
