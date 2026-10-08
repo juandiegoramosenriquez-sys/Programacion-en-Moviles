@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BarraSuperior
+import com.saludplus.citas.ui.components.fechaEnTexto
 
 @Composable
 fun MisCitasScreen(
@@ -64,7 +65,8 @@ fun MisCitasScreen(
                         ) {
                             Text(especialidad?.nombre ?: "-", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                             Text(medico?.nombre ?: "-")
-                            Text("📅 ${cita.fecha}   🕐 ${cita.hora}", color = Color.Gray)
+                            Text("📅 ${fechaEnTexto(cita.fecha)}", color = Color.Gray)
+                            Text("🕐 ${cita.hora}", color = Color.Gray)
                         }
                     }
                 }

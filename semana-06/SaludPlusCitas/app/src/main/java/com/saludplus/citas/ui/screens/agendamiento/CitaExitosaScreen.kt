@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.components.BotonPrincipal
+import com.saludplus.citas.ui.components.fechaEnTexto
 
 @Composable
 fun CitaExitosaScreen(
@@ -56,7 +57,7 @@ fun CitaExitosaScreen(
             ) {
                 FilaExito("Especialidad", especialidad?.nombre ?: "-")
                 FilaExito("Médico", medico?.nombre ?: "-")
-                FilaExito("Fecha", cita?.fecha ?: "-")
+                FilaExito("Fecha", cita?.fecha?.let { fechaEnTexto(it) } ?: "-")
                 FilaExito("Hora", cita?.hora ?: "-")
             }
         }

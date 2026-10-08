@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import com.saludplus.citas.ui.components.TarjetaEspecialidad
+import com.saludplus.citas.ui.components.fechaEnTexto
 
 
 @Composable
@@ -149,7 +150,7 @@ fun HomeScreen (
                         Text("No tienes citas próximas", color = Color.Gray)
                     } else {
                         Text(Repositorio.obtenerMedico(proxima.medicoId)?.nombre ?: "-")
-                        Text(" ${proxima.fecha}    ${proxima.hora}", color = Color.Gray)
+                        Text("${fechaEnTexto(proxima.fecha)} - ${proxima.hora}", color = Color.Gray)
                     }
                 }
             }
