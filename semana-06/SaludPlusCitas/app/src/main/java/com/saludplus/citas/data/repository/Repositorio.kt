@@ -60,27 +60,31 @@ object Repositorio {
     }
 
     fun buscarEspecialidades(texto: String): List<Especialidad> {
-        return especialidades
+        if (texto.isBlank()) return especialidades
+        return especialidades.filter { it.nombre.contains(texto, ignoreCase = true) }
     }
 
     fun especialidadesDestacadas(cantidad: Int = 4): List<Especialidad> {
-        return emptyList()
+        return especialidades.take(cantidad)
     }
 
     fun obtenerEspecialidad(id: Int): Especialidad? {
-        return null
+        return especialidades.find { it.id == id }
     }
 
     fun obtenerMedico(id: Int): Medico? {
-        return null
+        return medicos.find { it.id == id }
     }
 
     fun medicosPorEspecialidad(especialidadId: Int): List<Medico> {
-        return emptyList()
+        return medicos
+            .filter { it.especialidadId == especialidadId }
+            .sortedByDescending { it.calificacion }
     }
 
     fun buscarMedicos(especialidadId: Int, texto: String): List<Medico> {
-        return emptyList()
+        return medicosPorEspecialidad(especialidadId)
+            .filter { it.nombre.contains(texto, ignoreCase = true) }
     }
 
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
