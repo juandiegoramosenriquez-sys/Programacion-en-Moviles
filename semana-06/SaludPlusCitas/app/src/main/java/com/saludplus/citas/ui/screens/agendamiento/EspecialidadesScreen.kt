@@ -33,7 +33,9 @@ import com.saludplus.citas.ui.components.BarraSuperior
 import com.saludplus.citas.ui.components.CirculoEmoji
 import com.saludplus.citas.ui.components.colorDeFondo
 import com.saludplus.citas.ui.theme.TextoSecundario
-
+import com.saludplus.citas.ui.theme.AzulClaro
+import com.saludplus.citas.ui.theme.AzulPrimario
+import androidx.compose.material3.CardDefaults
 @Composable
 fun EspecialidadesScreen(
     onEspecialidadClick: (Int) -> Unit,
@@ -52,6 +54,27 @@ fun EspecialidadesScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            val sede = Repositorio.sedeActual?.let { Repositorio.obtenerSede(it) }
+            if (sede != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = AzulClaro)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text("🏥", fontSize = 22.sp)
+                        Column {
+                            Text(sede.nombre, color = AzulPrimario, fontWeight = FontWeight.Bold)
+                            Text(sede.direccion, color = TextoSecundario, fontSize = 13.sp)
+                        }
+                    }
+                }
+            }
             OutlinedTextField(
                 value = texto,
                 onValueChange = { texto = it },

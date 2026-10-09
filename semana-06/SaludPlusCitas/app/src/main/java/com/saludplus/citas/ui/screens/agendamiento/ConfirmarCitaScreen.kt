@@ -36,6 +36,7 @@ fun ConfirmarCitaScreen(
 ) {
     val medico = Repositorio.obtenerMedico(medicoId)
     val especialidad = Repositorio.obtenerEspecialidad(medico?.especialidadId ?: 0)
+    val sede = Repositorio.obtenerSede(medico?.sedeId ?: 0)
     val usuario = Repositorio.usuarioActual
     val horaFin = runCatching { LocalTime.parse(hora).plusMinutes(30).toString() }.getOrNull()
     var error by remember { mutableStateOf("") }
@@ -63,7 +64,7 @@ fun ConfirmarCitaScreen(
                     FilaInfo("📅", "Fecha", fechaEnTexto(fecha))
                     FilaInfo("🕐", "Hora", if (horaFin != null) "$hora a $horaFin" else hora)
                     FilaInfo("🏥", "Tipo de atención", "Consulta presencial")
-                    FilaInfo("📍", "Dirección", "Av. Los Olivos 123, Lima")
+                    FilaInfo("📍", sede?.nombre ?: "Sede", sede?.direccion ?: "-") // dirección real de la sede
                     FilaInfo("👤", "Paciente", "${usuario?.nombres ?: ""} ${usuario?.apellidos ?: ""}")
                 }
             }

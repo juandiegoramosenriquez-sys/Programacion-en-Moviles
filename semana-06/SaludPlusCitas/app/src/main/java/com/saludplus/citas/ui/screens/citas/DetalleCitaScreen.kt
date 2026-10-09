@@ -38,6 +38,7 @@ fun DetalleCitaScreen(
     val cita = Repositorio.obtenerCita(citaId)
     val medico = Repositorio.obtenerMedico(cita?.medicoId ?: 0)
     val especialidad = Repositorio.obtenerEspecialidad(cita?.especialidadId ?: 0)
+    val sede = Repositorio.obtenerSede(cita?.sedeId ?: 0)
     var mostrarDialogo by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -63,7 +64,7 @@ fun DetalleCitaScreen(
                     FilaInfo("📅", "Fecha", cita?.fecha?.let { fechaEnTexto(it) } ?: "-")
                     FilaInfo("🕐", "Hora", cita?.hora ?: "-")
                     FilaInfo("🏥", "Tipo de atención", "Consulta presencial")
-                    FilaInfo("📍", "Dirección", "Av. Los Olivos 123, Lima")
+                    FilaInfo("📍", sede?.nombre ?: "Sede", sede?.direccion ?: "-")
                 }
             }
 

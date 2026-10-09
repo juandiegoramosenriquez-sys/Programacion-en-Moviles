@@ -6,6 +6,8 @@ sealed class Rutas(val ruta: String) {
     object Login : Rutas("login")
     object Terminos : Rutas("terminos")
     object Home : Rutas("home")
+    object Sedes : Rutas("sedes")
+    object Doctores : Rutas("doctores")
     object Especialidades : Rutas("especialidades")
     object Medicos : Rutas("medicos/{especialidadId}") {
         fun crearRuta(especialidadId: Int) = "medicos/$especialidadId"
