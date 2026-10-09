@@ -6,5 +6,6 @@ data class Cita(
     val especialidadId: Int,
     val medicoId: Int,
     val fecha: String,
-    val hora: String
+    val hora: String,
+    val sedeId: Int = 0
 )
