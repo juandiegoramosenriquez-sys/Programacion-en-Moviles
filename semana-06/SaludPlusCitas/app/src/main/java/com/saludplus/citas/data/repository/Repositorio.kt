@@ -8,19 +8,28 @@ import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.model.Especialidad
 import com.saludplus.citas.data.model.Medico
 import com.saludplus.citas.data.model.Usuario
-
+import com.saludplus.citas.data.model.Sede
 object Repositorio {
 
     val usuarios = mutableStateListOf(
         Usuario(
-            nombres = "Paciente",
-            apellidos = "Demo",
+            nombres = "diego",
+            apellidos = "ramos",
             dni = "12345678",
-            correo = "demo@saludplus.com",
+            correo = "ramos@gmail.com",
             celular = "999999999",
             password = "123456"
         )
     )
+
+    val sedes = listOf(
+        Sede(1, "Sede San Isidro", "Av. Javier Prado Este 1250", "Lun a Vie · 8:00 a 16:00"),
+        Sede(2, "Sede Miraflores", "Av. Larco 820", "Lun a Vie · 8:00 a 16:00"),
+        Sede(3, "Sede Surco", "Av. Primavera 1555", "Lun a Vie · 8:00 a 16:00")
+    )
+
+    var sedeActual by mutableStateOf<Int?>(null)
+
 
     val especialidades = mutableStateListOf(
         Especialidad(1, "Medicina General", "Consulta general y chequeos", "🩺"),
@@ -32,15 +41,15 @@ object Repositorio {
     )
 
     val medicos = mutableStateListOf(
-        Medico(1, "Dr. Carlos Mendoza", 1, 4.8, 12),
-        Medico(2, "Dra. Lucía Torres", 1, 4.5, 8),
-        Medico(3, "Dr. Jorge Salazar", 2, 4.9, 20),
-        Medico(4, "Dra. Ana Quispe", 2, 4.6, 10),
-        Medico(5, "Dra. María Flores", 3, 4.7, 15),
-        Medico(6, "Dr. Luis Paredes", 3, 4.3, 6),
-        Medico(7, "Dra. Sofía Ramírez", 4, 4.8, 9),
-        Medico(8, "Dr. Pedro Castillo", 5, 4.4, 11),
-        Medico(9, "Dr. Miguel Rojas", 6, 4.6, 14)
+        Medico(1, "Dr. Carlos Mendoza", 1, 4.8, 12, sedeId = 1),
+        Medico(2, "Dra. Lucía Torres", 1, 4.5, 8, sedeId = 2),
+        Medico(3, "Dr. Jorge Salazar", 2, 4.9, 20, sedeId = 1),
+        Medico(4, "Dra. Ana Quispe", 2, 4.6, 10, sedeId = 2),
+        Medico(5, "Dra. María Flores", 3, 4.7, 15, sedeId = 1),
+        Medico(6, "Dr. Luis Paredes", 3, 4.3, 6, sedeId = 3),
+        Medico(7, "Dra. Sofía Ramírez", 4, 4.8, 9, sedeId = 1),
+        Medico(8, "Dr. Pedro Castillo", 5, 4.4, 11, sedeId = 2),
+        Medico(9, "Dr. Miguel Rojas", 6, 4.6, 14, sedeId = 3)
     )
 
     val citas = mutableStateListOf<Cita>()
@@ -66,6 +75,21 @@ object Repositorio {
 
     fun cerrarSesion() {
         usuarioActual = null
+        sedeActual = null
+    }
+
+    fun obtenerSede(id: Int): Sede? {
+        return sedes.find { it.id == id }
+    }
+
+    fun elegirSede(id: Int?) {
+        sedeActual = id
+    }
+
+    fun especialidadesDeSede(): List<Especialidad> {
+        val sede = sedeActual ?: return especialidades
+        val ids = medicos.filter { it.sedeId == sede }.map { it.especialidadId }
+        return especialidades.filter { it.id in ids }
     }
 
     fun buscarEspecialidades(texto: String): List<Especialidad> {
@@ -88,6 +112,7 @@ object Repositorio {
     fun medicosPorEspecialidad(especialidadId: Int): List<Medico> {
         return medicos
             .filter { it.especialidadId == especialidadId }
+            .filter { sedeActual == null || it.sedeId == sedeActual }
             .sortedByDescending { it.calificacion }
     }
 
@@ -115,8 +140,10 @@ object Repositorio {
             especialidadId = medico.especialidadId,
             medicoId = medicoId,
             fecha = fecha,
-            hora = hora
+            hora = hora,
+            sedeId = medico.sedeId
         )
+
         citas.add(cita)
         return cita
     }
