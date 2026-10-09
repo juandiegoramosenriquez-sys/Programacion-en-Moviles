@@ -47,7 +47,8 @@ import com.saludplus.citas.ui.theme.RojoClaro
 import com.saludplus.citas.ui.theme.TextoPrincipal
 import com.saludplus.citas.ui.theme.TextoSecundario
 import com.saludplus.citas.ui.theme.VerdeClaro
-
+import com.saludplus.citas.data.repository.Repositorio
+import com.saludplus.citas.ui.theme.Naranja
 @Composable
 fun BotonPrincipal(
     texto: String,
@@ -160,6 +161,8 @@ fun TarjetaMedico(
     medico: Medico?,
     especialidad: String
 ) {
+    val sede = Repositorio.obtenerSede(medico?.sedeId ?: 0)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp)
@@ -173,6 +176,9 @@ fun TarjetaMedico(
             Column {
                 Text(medico?.nombre ?: "Médico", fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Text(especialidad, color = TextoSecundario)
+                if (sede != null) {
+                    Text("🏥 ${sede.nombre}", color = Naranja, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }

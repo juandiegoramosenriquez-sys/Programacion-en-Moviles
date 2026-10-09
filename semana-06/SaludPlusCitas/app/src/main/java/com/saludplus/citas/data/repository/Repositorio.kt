@@ -7,14 +7,15 @@ import androidx.compose.runtime.setValue
 import com.saludplus.citas.data.model.Cita
 import com.saludplus.citas.data.model.Especialidad
 import com.saludplus.citas.data.model.Medico
-import com.saludplus.citas.data.model.Usuario
 import com.saludplus.citas.data.model.Sede
+import com.saludplus.citas.data.model.Usuario
+
 object Repositorio {
 
     val usuarios = mutableStateListOf(
         Usuario(
-            nombres = "diego",
-            apellidos = "ramos",
+            nombres = "Diego",
+            apellidos = "Ramos",
             dni = "12345678",
             correo = "ramos@gmail.com",
             celular = "999999999",
@@ -29,7 +30,6 @@ object Repositorio {
     )
 
     var sedeActual by mutableStateOf<Int?>(null)
-
 
     val especialidades = mutableStateListOf(
         Especialidad(1, "Medicina General", "Consulta general y chequeos", "🩺"),
@@ -86,15 +86,20 @@ object Repositorio {
         sedeActual = id
     }
 
+    fun medicosDeSede(sedeId: Int): List<Medico> {
+        return medicos.filter { it.sedeId == sedeId }
+    }
+
     fun especialidadesDeSede(): List<Especialidad> {
         val sede = sedeActual ?: return especialidades
-        val ids = medicos.filter { it.sedeId == sede }.map { it.especialidadId }
+        val ids = medicosDeSede(sede).map { it.especialidadId }
         return especialidades.filter { it.id in ids }
     }
 
     fun buscarEspecialidades(texto: String): List<Especialidad> {
-        if (texto.isBlank()) return especialidades
-        return especialidades.filter { it.nombre.contains(texto, ignoreCase = true) }
+        val base = especialidadesDeSede()
+        if (texto.isBlank()) return base
+        return base.filter { it.nombre.contains(texto, ignoreCase = true) }
     }
 
     fun especialidadesDestacadas(cantidad: Int = 4): List<Especialidad> {
@@ -121,6 +126,16 @@ object Repositorio {
             .filter { it.nombre.contains(texto, ignoreCase = true) }
     }
 
+    fun buscarDoctores(texto: String): List<Medico> {
+        return medicos
+            .filter {
+                texto.isBlank() ||
+                        it.nombre.contains(texto, ignoreCase = true) ||
+                        (obtenerEspecialidad(it.especialidadId)?.nombre?.contains(texto, ignoreCase = true) == true)
+            }
+            .sortedWith(compareBy<Medico> { it.especialidadId }.thenByDescending { it.calificacion })
+    }
+
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
         val ocupados = citas
             .filter { it.medicoId == medicoId && it.fecha == fecha }
@@ -143,7 +158,6 @@ object Repositorio {
             hora = hora,
             sedeId = medico.sedeId
         )
-
         citas.add(cita)
         return cita
     }

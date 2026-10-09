@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.saludplus.citas.data.repository.Repositorio
 import com.saludplus.citas.ui.screens.agendamiento.CitaExitosaScreen
 import com.saludplus.citas.ui.screens.agendamiento.ConfirmarCitaScreen
 import com.saludplus.citas.ui.screens.agendamiento.EspecialidadesScreen
@@ -17,14 +18,22 @@ import com.saludplus.citas.ui.screens.auth.SplashScreen
 import com.saludplus.citas.ui.screens.auth.TerminosScreen
 import com.saludplus.citas.ui.screens.citas.DetalleCitaScreen
 import com.saludplus.citas.ui.screens.citas.MisCitasScreen
+import com.saludplus.citas.ui.screens.doctores.DoctoresScreen
 import com.saludplus.citas.ui.screens.home.HomeScreen
 import com.saludplus.citas.ui.screens.notificaciones.NotificacionesScreen
 import com.saludplus.citas.ui.screens.perfil.PerfilScreen
 import com.saludplus.citas.ui.screens.resultados.ResultadosScreen
+import com.saludplus.citas.ui.screens.sedes.SedesScreen
 
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+
+    val irASplash: () -> Unit = {
+        navController.navigate(Rutas.Splash.ruta) {
+            popUpTo(0) { inclusive = true }
+        }
+    }
 
     NavHost(navController = navController, startDestination = Rutas.Splash.ruta) {
 
@@ -65,12 +74,38 @@ fun AppNavigation() {
 
         composable(Rutas.Home.ruta) {
             HomeScreen(
-                onAgendarCita = { navController.navigate(Rutas.Especialidades.ruta) },
-                onEspecialidadClick = { id -> navController.navigate(Rutas.Medicos.crearRuta(id)) },
+                onAgendarCita = {
+                    Repositorio.elegirSede(null)
+                    navController.navigate(Rutas.Especialidades.ruta)
+                },
+                onEspecialidadClick = { id ->
+                    Repositorio.elegirSede(null)
+                    navController.navigate(Rutas.Medicos.crearRuta(id))
+                },
                 onNotificaciones = { navController.navigate(Rutas.Notificaciones.ruta) },
                 onMisCitas = { navController.navigate(Rutas.MisCitas.ruta) },
                 onResultados = { navController.navigate(Rutas.Resultados.ruta) },
-                onPerfil = { navController.navigate(Rutas.Perfil.ruta) }
+                onPerfil = { navController.navigate(Rutas.Perfil.ruta) },
+                onSedes = { navController.navigate(Rutas.Sedes.ruta) },
+                onDoctores = {
+                    Repositorio.elegirSede(null)
+                    navController.navigate(Rutas.Doctores.ruta)
+                },
+                onCerrarSesion = irASplash
+            )
+        }
+
+        composable(Rutas.Sedes.ruta) {
+            SedesScreen(
+                onSedeElegida = { navController.navigate(Rutas.Especialidades.ruta) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Rutas.Doctores.ruta) {
+            DoctoresScreen(
+                onMedicoClick = { id -> navController.navigate(Rutas.FechaHora.crearRuta(id)) },
+                onBack = { navController.popBackStack() }
             )
         }
 
@@ -167,11 +202,7 @@ fun AppNavigation() {
 
         composable(Rutas.Perfil.ruta) {
             PerfilScreen(
-                onCerrarSesion = {
-                    navController.navigate(Rutas.Splash.ruta) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
+                onCerrarSesion = irASplash,
                 onBack = { navController.popBackStack() }
             )
         }
