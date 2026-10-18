@@ -5,15 +5,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -24,9 +21,11 @@ import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.Rol
 import com.tecsup.lavacampus.ui.administrador.ServiciosScreen
 import com.tecsup.lavacampus.ui.components.AppTopBar
+import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.theme.LavaTheme
+import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
 import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
@@ -64,7 +63,8 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
         }
 
         composable(Rutas.INICIO) {
-            val usuario by sesion.usuarioActual.collectAsState()
+            val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
+            val vm: InicioViewModel = viewModel(factory = LavaViewModelFactory { InicioViewModel(repo, usuario.id) })
             LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
                 Scaffold(topBar = {
                     AppTopBar("Inicio", acciones = {
@@ -73,10 +73,14 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                         }
                     })
                 }) { padding ->
-                    Text(
-                        "Hola, ${usuario?.nombre.orEmpty()}",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(padding).padding(16.dp)
+                    InicioScreen(
+                        usuario = usuario,
+                        vm = vm,
+                        onNuevoPedido = { },
+                        onMisPedidos = { },
+                        onTarifas = { },
+                        onPedido = { },
+                        modifier = Modifier.padding(padding)
                     )
                 }
             }
