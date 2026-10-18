@@ -2,28 +2,44 @@ package com.tecsup.lavacampus.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.LocalLaundryService
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.Sell
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.Rol
+import com.tecsup.lavacampus.ui.administrador.AjustesScreen
 import com.tecsup.lavacampus.ui.administrador.BandejaScreen
+import com.tecsup.lavacampus.ui.administrador.ClientesScreen
+import com.tecsup.lavacampus.ui.administrador.FormularioServicioScreen
 import com.tecsup.lavacampus.ui.administrador.GestionPedidoScreen
 import com.tecsup.lavacampus.ui.administrador.PanelScreen
 import com.tecsup.lavacampus.ui.administrador.ServiciosScreen
@@ -33,10 +49,12 @@ import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
 import com.tecsup.lavacampus.ui.estudiante.MisPedidosScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
+import com.tecsup.lavacampus.ui.estudiante.PerfilScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.estudiante.TarifasScreen
 import com.tecsup.lavacampus.ui.theme.LavaTheme
 import com.tecsup.lavacampus.viewmodel.BandejaViewModel
+import com.tecsup.lavacampus.viewmodel.ClientesViewModel
 import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
 import com.tecsup.lavacampus.viewmodel.GestionPedidoViewModel
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
@@ -48,6 +66,23 @@ import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
 import kotlinx.coroutines.launch
 
+private data class ItemBarra(val ruta: String, val texto: String, val icono: ImageVector)
+
+private val itemsEstudiante = listOf(
+    ItemBarra(Rutas.INICIO, "Inicio", Icons.Default.Home),
+    ItemBarra(Rutas.MIS_PEDIDOS, "Pedidos", Icons.Default.Receipt),
+    ItemBarra(Rutas.TARIFAS, "Tarifas", Icons.Default.Sell),
+    ItemBarra(Rutas.PERFIL, "Perfil", Icons.Default.Person)
+)
+
+private val itemsAdmin = listOf(
+    ItemBarra(Rutas.PANEL, "Panel", Icons.Default.Dashboard),
+    ItemBarra(Rutas.BANDEJA, "Pedidos", Icons.Default.Inbox),
+    ItemBarra(Rutas.SERVICIOS, "Servicios", Icons.Default.LocalLaundryService),
+    ItemBarra(Rutas.CLIENTES, "Clientes", Icons.Default.Groups),
+    ItemBarra(Rutas.AJUSTES, "Ajustes", Icons.Default.Settings)
+)
+
 @Composable
 fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
     val nav = rememberNavController()
@@ -55,10 +90,19 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
     val sesion: SesionViewModel = viewModel(factory = LavaViewModelFactory { SesionViewModel(repo, prefs) })
     val oscuro by sesion.modoOscuro.collectAsState()
 
-    val cerrarSesion = {
+    val cerrarSesion: () -> Unit = {
         sesion.cerrarSesion()
         nav.navigate(Rutas.LOGIN) {
             popUpTo(nav.graph.id) { inclusive = true }
+        }
+    }
+
+    val cambiarPerfil: () -> Unit = {
+        scope.launch {
+            val otro = sesion.cambiarPerfil() ?: return@launch
+            nav.navigate(principalDe(otro.rol)) {
+                popUpTo(nav.graph.id) { inclusive = true }
+            }
         }
     }
 
@@ -68,87 +112,51 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                 scope.launch {
                     val usuario = sesion.restaurarSesion()
                     val destino = if (usuario == null) Rutas.LOGIN else principalDe(usuario.rol)
-                    irA(nav, destino, Rutas.SPLASH)
+                    nav.navigate(destino) {
+                        popUpTo(Rutas.SPLASH) { inclusive = true }
+                    }
                 }
             })
         }
 
         composable(Rutas.LOGIN) {
             LoginScreen(sesion, onIngresar = { usuario ->
-                irA(nav, principalDe(usuario.rol), Rutas.LOGIN)
+                nav.navigate(principalDe(usuario.rol)) {
+                    popUpTo(Rutas.LOGIN) { inclusive = true }
+                }
             })
         }
 
         composable(Rutas.INICIO) {
             val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
             val vm: InicioViewModel = viewModel(factory = LavaViewModelFactory { InicioViewModel(repo, usuario.id) })
-            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Inicio", acciones = {
-                        IconButton(onClick = cerrarSesion) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
-                        }
-                    })
-                }) { padding ->
-                    InicioScreen(
-                        usuario = usuario,
-                        vm = vm,
-                        onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
-                        onMisPedidos = { nav.navigate(Rutas.MIS_PEDIDOS) },
-                        onTarifas = { nav.navigate(Rutas.TARIFAS) },
-                        onPedido = { nav.navigate(Rutas.detallePedido(it)) },
-                        modifier = Modifier.padding(padding)
-                    )
-                }
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Inicio", conBarra = true) { modifier ->
+                InicioScreen(
+                    usuario = usuario,
+                    vm = vm,
+                    onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
+                    onMisPedidos = { irPestana(nav, Rutas.MIS_PEDIDOS, Rutas.INICIO) },
+                    onTarifas = { irPestana(nav, Rutas.TARIFAS, Rutas.INICIO) },
+                    onPedido = { nav.navigate(Rutas.detallePedido(it)) },
+                    modifier = modifier
+                )
             }
         }
 
         composable(Rutas.NUEVO_PEDIDO) {
             val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
-            val vm: NuevoPedidoViewModel = viewModel(factory = LavaViewModelFactory { NuevoPedidoViewModel(repo, usuario.id) })
-            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Nuevo pedido", onAtras = { nav.popBackStack() })
-                }) { padding ->
-                    NuevoPedidoScreen(
-                        vm = vm,
-                        onCreado = {
-                            nav.navigate(Rutas.MIS_PEDIDOS) {
-                                popUpTo(Rutas.INICIO)
-                                launchSingleTop = true
-                            }
-                        },
-                        modifier = Modifier.padding(padding)
-                    )
-                }
-            }
-        }
-
-        composable(Rutas.MIS_PEDIDOS) {
-            val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
-            val vm: MisPedidosViewModel = viewModel(factory = LavaViewModelFactory { MisPedidosViewModel(repo, usuario.id) })
-            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Mis pedidos", onAtras = { nav.popBackStack() })
-                }) { padding ->
-                    MisPedidosScreen(
-                        vm = vm,
-                        onPedido = { nav.navigate(Rutas.detallePedido(it)) },
-                        onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
-                        modifier = Modifier.padding(padding)
-                    )
-                }
-            }
-        }
-
-        composable(Rutas.TARIFAS) {
-            val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
-            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Tarifas", onAtras = { nav.popBackStack() })
-                }) { padding ->
-                    TarifasScreen(vm = vm, modifier = Modifier.padding(padding))
-                }
+            val vm: NuevoPedidoViewModel = viewModel(factory = LavaViewModelFactory { NuevoPedidoViewModel(repo, usuario.id, prefs) })
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Nuevo pedido", conBarra = false) { modifier ->
+                NuevoPedidoScreen(
+                    vm = vm,
+                    onCreado = {
+                        nav.navigate(Rutas.MIS_PEDIDOS) {
+                            popUpTo(Rutas.INICIO)
+                            launchSingleTop = true
+                        }
+                    },
+                    modifier = modifier
+                )
             }
         }
 
@@ -158,52 +166,65 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
         ) { entrada ->
             val id = entrada.arguments?.getInt("id") ?: 0
             val vm: DetallePedidoViewModel = viewModel(factory = LavaViewModelFactory { DetallePedidoViewModel(repo, id) })
-            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Detalle del pedido", onAtras = { nav.popBackStack() })
-                }) { padding ->
-                    DetallePedidoScreen(vm = vm, modifier = Modifier.padding(padding))
-                }
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Detalle del pedido", conBarra = false) { modifier ->
+                DetallePedidoScreen(vm = vm, modifier = modifier)
+            }
+        }
+
+        composable(Rutas.MIS_PEDIDOS) {
+            val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
+            val vm: MisPedidosViewModel = viewModel(factory = LavaViewModelFactory { MisPedidosViewModel(repo, usuario.id) })
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Mis pedidos", conBarra = true) { modifier ->
+                MisPedidosScreen(
+                    vm = vm,
+                    onPedido = { nav.navigate(Rutas.detallePedido(it)) },
+                    onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
+                    modifier = modifier
+                )
+            }
+        }
+
+        composable(Rutas.TARIFAS) {
+            val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Tarifas", conBarra = true) { modifier ->
+                TarifasScreen(vm = vm, modifier = modifier)
+            }
+        }
+
+        composable(Rutas.PERFIL) {
+            val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
+            val vm: MisPedidosViewModel = viewModel(factory = LavaViewModelFactory { MisPedidosViewModel(repo, usuario.id) })
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Perfil", conBarra = true) { modifier ->
+                PerfilScreen(
+                    usuario = usuario,
+                    pedidosVm = vm,
+                    sesion = sesion,
+                    onCambiarPerfil = cambiarPerfil,
+                    onCerrarSesion = cerrarSesion,
+                    modifier = modifier
+                )
             }
         }
 
         composable(Rutas.PANEL) {
             val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory { PanelViewModel(repo) })
-            LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Panel", acciones = {
-                        IconButton(onClick = { nav.navigate(Rutas.BANDEJA) }) {
-                            Icon(Icons.Default.Inbox, contentDescription = "Pedidos")
-                        }
-                        IconButton(onClick = { nav.navigate(Rutas.SERVICIOS) }) {
-                            Icon(Icons.Default.LocalLaundryService, contentDescription = "Servicios")
-                        }
-                        IconButton(onClick = cerrarSesion) {
-                            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
-                        }
-                    })
-                }) { padding ->
-                    PanelScreen(
-                        vm = vm,
-                        onVerListos = { nav.navigate(Rutas.BANDEJA) },
-                        modifier = Modifier.padding(padding)
-                    )
-                }
+            Pantalla(nav, Rol.ADMIN, oscuro, "Panel", conBarra = true) { modifier ->
+                PanelScreen(
+                    vm = vm,
+                    onVerListos = { irPestana(nav, Rutas.BANDEJA, Rutas.PANEL) },
+                    modifier = modifier
+                )
             }
         }
 
         composable(Rutas.BANDEJA) {
             val vm: BandejaViewModel = viewModel(factory = LavaViewModelFactory { BandejaViewModel(repo) })
-            LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Pedidos", onAtras = { nav.popBackStack() })
-                }) { padding ->
-                    BandejaScreen(
-                        vm = vm,
-                        onAbrir = { nav.navigate(Rutas.gestionPedido(it)) },
-                        modifier = Modifier.padding(padding)
-                    )
-                }
+            Pantalla(nav, Rol.ADMIN, oscuro, "Pedidos", conBarra = true) { modifier ->
+                BandejaScreen(
+                    vm = vm,
+                    onAbrir = { nav.navigate(Rutas.gestionPedido(it)) },
+                    modifier = modifier
+                )
             }
         }
 
@@ -213,37 +234,118 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
         ) { entrada ->
             val id = entrada.arguments?.getInt("id") ?: 0
             val vm: GestionPedidoViewModel = viewModel(factory = LavaViewModelFactory { GestionPedidoViewModel(repo, id) })
-            LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Gestionar pedido", onAtras = { nav.popBackStack() })
-                }) { padding ->
-                    GestionPedidoScreen(vm = vm, modifier = Modifier.padding(padding))
-                }
+            Pantalla(nav, Rol.ADMIN, oscuro, "Gestionar pedido", conBarra = false) { modifier ->
+                GestionPedidoScreen(vm = vm, modifier = modifier)
             }
         }
 
         composable(Rutas.SERVICIOS) {
             val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
-            LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
-                Scaffold(topBar = {
-                    AppTopBar("Servicios", onAtras = { nav.popBackStack() })
-                }) { padding ->
-                    ServiciosScreen(
-                        vm = vm,
-                        onEditar = { },
-                        modifier = Modifier.padding(padding)
-                    )
+            Pantalla(
+                nav, Rol.ADMIN, oscuro, "Servicios", conBarra = true,
+                botonFlotante = {
+                    FloatingActionButton(
+                        onClick = { nav.navigate(Rutas.formularioServicio(0)) },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Nuevo servicio")
+                    }
                 }
+            ) { modifier ->
+                ServiciosScreen(
+                    vm = vm,
+                    onEditar = { nav.navigate(Rutas.formularioServicio(it)) },
+                    modifier = modifier
+                )
+            }
+        }
+
+        composable(
+            Rutas.FORMULARIO_SERVICIO,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("id") ?: 0
+            val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
+            val titulo = if (id == 0) "Nuevo servicio" else "Editar servicio"
+            Pantalla(nav, Rol.ADMIN, oscuro, titulo, conBarra = false) { modifier ->
+                FormularioServicioScreen(
+                    vm = vm,
+                    servicioId = id,
+                    onListo = { nav.popBackStack() },
+                    modifier = modifier
+                )
+            }
+        }
+
+        composable(Rutas.CLIENTES) {
+            val vm: ClientesViewModel = viewModel(factory = LavaViewModelFactory { ClientesViewModel(repo) })
+            Pantalla(nav, Rol.ADMIN, oscuro, "Clientes", conBarra = true) { modifier ->
+                ClientesScreen(vm = vm, modifier = modifier)
+            }
+        }
+
+        composable(Rutas.AJUSTES) {
+            val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
+            Pantalla(nav, Rol.ADMIN, oscuro, "Ajustes", conBarra = true) { modifier ->
+                AjustesScreen(
+                    usuario = usuario,
+                    sesion = sesion,
+                    onCambiarPerfil = cambiarPerfil,
+                    onCerrarSesion = cerrarSesion,
+                    modifier = modifier
+                )
             }
         }
     }
 }
 
-private fun principalDe(rol: String): String =
-    if (rol == Rol.ADMIN.name) Rutas.PANEL else Rutas.INICIO
-
-private fun irA(nav: NavHostController, destino: String, desde: String) {
-    nav.navigate(destino) {
-        popUpTo(desde) { inclusive = true }
+@Composable
+private fun Pantalla(
+    nav: NavHostController,
+    rol: Rol,
+    oscuro: Boolean,
+    titulo: String,
+    conBarra: Boolean,
+    botonFlotante: @Composable () -> Unit = {},
+    contenido: @Composable (Modifier) -> Unit
+) {
+    val atras: (() -> Unit)? = if (conBarra) null else { { nav.popBackStack() } }
+    LavaTheme(rol = rol, oscuro = oscuro) {
+        Scaffold(
+            topBar = { AppTopBar(titulo, onAtras = atras) },
+            bottomBar = { if (conBarra) BarraInferior(nav, rol) },
+            floatingActionButton = botonFlotante
+        ) { padding ->
+            contenido(Modifier.padding(padding))
+        }
     }
 }
+
+@Composable
+private fun BarraInferior(nav: NavHostController, rol: Rol) {
+    val ruta = nav.currentBackStackEntryAsState().value?.destination?.route
+    val items = if (rol == Rol.ADMIN) itemsAdmin else itemsEstudiante
+    val raiz = if (rol == Rol.ADMIN) Rutas.PANEL else Rutas.INICIO
+    NavigationBar {
+        items.forEach { item ->
+            NavigationBarItem(
+                selected = ruta == item.ruta,
+                onClick = { irPestana(nav, item.ruta, raiz) },
+                icon = { Icon(item.icono, contentDescription = item.texto) },
+                label = { Text(item.texto) }
+            )
+        }
+    }
+}
+
+private fun irPestana(nav: NavHostController, ruta: String, raiz: String) {
+    nav.navigate(ruta) {
+        popUpTo(raiz) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
+private fun principalDe(rol: String): String =
+    if (rol == Rol.ADMIN.name) Rutas.PANEL else Rutas.INICIO

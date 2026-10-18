@@ -3,6 +3,7 @@ package com.tecsup.lavacampus.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.lavacampus.data.local.entity.Servicio
+import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.LineaPedido
 import com.tecsup.lavacampus.model.Unidad
@@ -17,8 +18,12 @@ import java.time.LocalDate
 
 class NuevoPedidoViewModel(
     private val repo: LavaRepository,
-    private val usuarioId: Int
+    private val usuarioId: Int,
+    prefs: PreferenciasStore
 ) : ViewModel() {
+
+    val recibiendo: StateFlow<Boolean> = prefs.recibirPedidos
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val servicios: StateFlow<List<Servicio>> = repo.observarServiciosActivos()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -67,6 +72,10 @@ class NuevoPedidoViewModel(
         viewModelScope.launch {
             val elegidos = servicios.value.filter { (_cantidades.value[it.id] ?: 0.0) > 0.0 }
             if (elegidos.isEmpty()) return@launch
+            if (!recibiendo.value) {
+                _mensaje.value = "La lavandería no está recibiendo pedidos"
+                return@launch
+            }
             if (repo.contarActivos(usuarioId) >= 3) {
                 _mensaje.value = "Ya tienes 3 pedidos activos"
                 return@launch

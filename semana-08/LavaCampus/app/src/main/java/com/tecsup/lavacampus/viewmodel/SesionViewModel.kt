@@ -27,6 +27,33 @@ class SesionViewModel(
     val modoOscuro: StateFlow<Boolean> = prefs.modoOscuro
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val notificaciones: StateFlow<Boolean> = prefs.notificaciones
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val recibirPedidos: StateFlow<Boolean> = prefs.recibirPedidos
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    fun cambiarModoOscuro(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarModoOscuro(activo) }
+    }
+
+    fun cambiarNotificaciones(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarNotificaciones(activo) }
+    }
+
+    fun cambiarRecibirPedidos(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarRecibirPedidos(activo) }
+    }
+
+    suspend fun cambiarPerfil(): Usuario? {
+        val actual = _usuarioActual.value ?: return null
+        val otroRol = if (actual.rol == Rol.ADMIN.name) Rol.CLIENTE else Rol.ADMIN
+        val otro = repo.obtenerUsuarioPorRol(otroRol.name) ?: return null
+        prefs.guardarSesion(otroRol, otro.id)
+        _usuarioActual.value = otro
+        return otro
+    }
+
     suspend fun restaurarSesion(): Usuario? {
         val perfil = prefs.perfilActivo.first()
         val id = prefs.usuarioId.first()

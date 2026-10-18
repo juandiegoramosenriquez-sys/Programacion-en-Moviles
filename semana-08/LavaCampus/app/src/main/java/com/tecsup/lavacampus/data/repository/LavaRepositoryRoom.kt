@@ -24,6 +24,8 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
 
     override suspend fun obtenerUsuario(id: Int): Usuario? = usuarioDao.obtener(id)
 
+    override suspend fun obtenerUsuarioPorRol(rol: String): Usuario? = usuarioDao.obtenerPorRol(rol)
+
     override fun observarClientes(): Flow<List<ClienteResumen>> = usuarioDao.observarClientes()
 
     override fun observarServicios(): Flow<List<Servicio>> = servicioDao.observarTodos()
@@ -31,7 +33,7 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
     override fun observarServiciosActivos(): Flow<List<Servicio>> = servicioDao.observarActivos()
 
     override suspend fun guardarServicio(s: Servicio) {
-        servicioDao.insertar(s)
+        if (s.id == 0) servicioDao.insertar(s) else servicioDao.actualizar(s)
     }
 
     override suspend fun eliminarServicio(s: Servicio) {
