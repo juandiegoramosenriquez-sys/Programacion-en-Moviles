@@ -3,6 +3,7 @@ package com.tecsup.lavacampus.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.LocalLaundryService
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -21,6 +22,7 @@ import androidx.navigation.navArgument
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.Rol
+import com.tecsup.lavacampus.ui.administrador.PanelScreen
 import com.tecsup.lavacampus.ui.administrador.ServiciosScreen
 import com.tecsup.lavacampus.ui.components.AppTopBar
 import com.tecsup.lavacampus.ui.estudiante.DetallePedidoScreen
@@ -36,6 +38,7 @@ import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
 import com.tecsup.lavacampus.viewmodel.MisPedidosViewModel
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
+import com.tecsup.lavacampus.viewmodel.PanelViewModel
 import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
 import kotlinx.coroutines.launch
@@ -159,15 +162,33 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
             }
         }
 
-        composable(Rutas.SERVICIOS) {
-            val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
+        composable(Rutas.PANEL) {
+            val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory { PanelViewModel(repo) })
             LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
                 Scaffold(topBar = {
-                    AppTopBar("Servicios", acciones = {
+                    AppTopBar("Panel", acciones = {
+                        IconButton(onClick = { nav.navigate(Rutas.SERVICIOS) }) {
+                            Icon(Icons.Default.LocalLaundryService, contentDescription = "Servicios")
+                        }
                         IconButton(onClick = cerrarSesion) {
                             Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
                         }
                     })
+                }) { padding ->
+                    PanelScreen(
+                        vm = vm,
+                        onVerListos = { },
+                        modifier = Modifier.padding(padding)
+                    )
+                }
+            }
+        }
+
+        composable(Rutas.SERVICIOS) {
+            val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
+            LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
+                Scaffold(topBar = {
+                    AppTopBar("Servicios", onAtras = { nav.popBackStack() })
                 }) { padding ->
                     ServiciosScreen(
                         vm = vm,
@@ -181,7 +202,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
 }
 
 private fun principalDe(rol: String): String =
-    if (rol == Rol.ADMIN.name) Rutas.SERVICIOS else Rutas.INICIO
+    if (rol == Rol.ADMIN.name) Rutas.PANEL else Rutas.INICIO
 
 private fun irA(nav: NavHostController, destino: String, desde: String) {
     nav.navigate(destino) {
