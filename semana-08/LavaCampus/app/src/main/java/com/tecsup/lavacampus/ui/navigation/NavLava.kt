@@ -23,10 +23,12 @@ import com.tecsup.lavacampus.ui.administrador.ServiciosScreen
 import com.tecsup.lavacampus.ui.components.AppTopBar
 import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
+import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.theme.LavaTheme
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
+import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
 import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
 import kotlinx.coroutines.launch
@@ -76,10 +78,26 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                     InicioScreen(
                         usuario = usuario,
                         vm = vm,
-                        onNuevoPedido = { },
+                        onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
                         onMisPedidos = { },
                         onTarifas = { },
                         onPedido = { },
+                        modifier = Modifier.padding(padding)
+                    )
+                }
+            }
+        }
+
+        composable(Rutas.NUEVO_PEDIDO) {
+            val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
+            val vm: NuevoPedidoViewModel = viewModel(factory = LavaViewModelFactory { NuevoPedidoViewModel(repo, usuario.id) })
+            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
+                Scaffold(topBar = {
+                    AppTopBar("Nuevo pedido", onAtras = { nav.popBackStack() })
+                }) { padding ->
+                    NuevoPedidoScreen(
+                        vm = vm,
+                        onCreado = { nav.popBackStack() },
                         modifier = Modifier.padding(padding)
                     )
                 }
