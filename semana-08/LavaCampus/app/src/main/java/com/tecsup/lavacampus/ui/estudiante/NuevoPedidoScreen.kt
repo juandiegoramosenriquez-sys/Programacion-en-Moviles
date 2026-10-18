@@ -26,14 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.data.local.entity.Servicio
-import com.tecsup.lavacampus.model.Unidad
 import com.tecsup.lavacampus.ui.components.IconoServicio
 import com.tecsup.lavacampus.ui.components.LavaButton
 import com.tecsup.lavacampus.ui.components.LavaTextField
 import com.tecsup.lavacampus.ui.components.SelectorCantidad
 import com.tecsup.lavacampus.ui.components.formatoSoles
+import com.tecsup.lavacampus.ui.components.textoCantidad
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
-import java.util.Locale
 
 @Composable
 fun NuevoPedidoScreen(
@@ -94,7 +93,7 @@ fun NuevoPedidoScreen(
                     elegidos.forEach { s ->
                         val cantidad = cantidades[s.id] ?: 0.0
                         Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
-                            Text("${s.nombre} × ${textoCantidad(s, cantidad)}", modifier = Modifier.weight(1f))
+                            Text("${s.nombre} × ${textoCantidad(s.unidad, cantidad)}", modifier = Modifier.weight(1f))
                             Text(formatoSoles(cantidad * s.precio))
                         }
                     }
@@ -157,7 +156,3 @@ private fun ServicioCantidad(
         }
     }
 }
-
-private fun textoCantidad(s: Servicio, cantidad: Double): String =
-    if (s.unidad == Unidad.KG.name) String.format(Locale.US, "%.1f kg", cantidad)
-    else "${cantidad.toInt()} ${s.unidad.lowercase()}"

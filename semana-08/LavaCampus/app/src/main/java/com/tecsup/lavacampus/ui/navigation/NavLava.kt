@@ -13,19 +13,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.Rol
 import com.tecsup.lavacampus.ui.administrador.ServiciosScreen
 import com.tecsup.lavacampus.ui.components.AppTopBar
+import com.tecsup.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.theme.LavaTheme
+import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
@@ -81,7 +85,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                         onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
                         onMisPedidos = { },
                         onTarifas = { },
-                        onPedido = { },
+                        onPedido = { nav.navigate(Rutas.detallePedido(it)) },
                         modifier = Modifier.padding(padding)
                     )
                 }
@@ -100,6 +104,21 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                         onCreado = { nav.popBackStack() },
                         modifier = Modifier.padding(padding)
                     )
+                }
+            }
+        }
+
+        composable(
+            Rutas.DETALLE_PEDIDO,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("id") ?: 0
+            val vm: DetallePedidoViewModel = viewModel(factory = LavaViewModelFactory { DetallePedidoViewModel(repo, id) })
+            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
+                Scaffold(topBar = {
+                    AppTopBar("Detalle del pedido", onAtras = { nav.popBackStack() })
+                }) { padding ->
+                    DetallePedidoScreen(vm = vm, modifier = Modifier.padding(padding))
                 }
             }
         }
