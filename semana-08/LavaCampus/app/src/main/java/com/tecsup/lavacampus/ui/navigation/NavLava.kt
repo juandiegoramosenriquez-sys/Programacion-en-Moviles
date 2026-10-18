@@ -26,12 +26,15 @@ import com.tecsup.lavacampus.ui.components.AppTopBar
 import com.tecsup.lavacampus.ui.estudiante.DetallePedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.InicioScreen
 import com.tecsup.lavacampus.ui.estudiante.LoginScreen
+import com.tecsup.lavacampus.ui.estudiante.MisPedidosScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
+import com.tecsup.lavacampus.ui.estudiante.TarifasScreen
 import com.tecsup.lavacampus.ui.theme.LavaTheme
 import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
+import com.tecsup.lavacampus.viewmodel.MisPedidosViewModel
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
 import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
@@ -83,8 +86,8 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                         usuario = usuario,
                         vm = vm,
                         onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
-                        onMisPedidos = { },
-                        onTarifas = { },
+                        onMisPedidos = { nav.navigate(Rutas.MIS_PEDIDOS) },
+                        onTarifas = { nav.navigate(Rutas.TARIFAS) },
                         onPedido = { nav.navigate(Rutas.detallePedido(it)) },
                         modifier = Modifier.padding(padding)
                     )
@@ -101,9 +104,42 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                 }) { padding ->
                     NuevoPedidoScreen(
                         vm = vm,
-                        onCreado = { nav.popBackStack() },
+                        onCreado = {
+                            nav.navigate(Rutas.MIS_PEDIDOS) {
+                                popUpTo(Rutas.INICIO)
+                                launchSingleTop = true
+                            }
+                        },
                         modifier = Modifier.padding(padding)
                     )
+                }
+            }
+        }
+
+        composable(Rutas.MIS_PEDIDOS) {
+            val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
+            val vm: MisPedidosViewModel = viewModel(factory = LavaViewModelFactory { MisPedidosViewModel(repo, usuario.id) })
+            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
+                Scaffold(topBar = {
+                    AppTopBar("Mis pedidos", onAtras = { nav.popBackStack() })
+                }) { padding ->
+                    MisPedidosScreen(
+                        vm = vm,
+                        onPedido = { nav.navigate(Rutas.detallePedido(it)) },
+                        onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
+                        modifier = Modifier.padding(padding)
+                    )
+                }
+            }
+        }
+
+        composable(Rutas.TARIFAS) {
+            val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
+            LavaTheme(rol = Rol.CLIENTE, oscuro = oscuro) {
+                Scaffold(topBar = {
+                    AppTopBar("Tarifas", onAtras = { nav.popBackStack() })
+                }) { padding ->
+                    TarifasScreen(vm = vm, modifier = Modifier.padding(padding))
                 }
             }
         }
