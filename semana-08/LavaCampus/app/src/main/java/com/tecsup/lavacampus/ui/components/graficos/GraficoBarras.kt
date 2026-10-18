@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -20,22 +20,21 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun GraficoBarras(
-    etiquetas: List<String>,
-    valores: List<Double>,
+    datos: List<DatoGrafico>,
     modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary,
-    alto: Dp = 160.dp
+    alto: Dp = 140.dp
 ) {
-    val maximo = valores.maxOrNull()?.takeIf { it > 0.0 } ?: 1.0
+    val colorBase = MaterialTheme.colorScheme.primary
+    val maximo = datos.maxOfOrNull { it.valor }?.takeIf { it > 0.0 } ?: 1.0
     Column(modifier.fillMaxWidth()) {
         Canvas(Modifier.fillMaxWidth().height(alto)) {
-            if (valores.isEmpty()) return@Canvas
-            val ancho = size.width / valores.size
+            if (datos.isEmpty()) return@Canvas
+            val ancho = size.width / datos.size
             val barra = ancho * 0.6f
-            valores.forEachIndexed { i, v ->
-                val h = (v / maximo).toFloat() * size.height
+            datos.forEachIndexed { i, d ->
+                val h = (d.valor / maximo).toFloat() * size.height
                 drawRoundRect(
-                    color,
+                    if (d.color.isSpecified) d.color else colorBase,
                     topLeft = Offset(ancho * i + (ancho - barra) / 2, size.height - h),
                     size = Size(barra, h),
                     cornerRadius = CornerRadius(6.dp.toPx())
@@ -43,12 +42,12 @@ fun GraficoBarras(
             }
         }
         Row(Modifier.fillMaxWidth()) {
-            etiquetas.forEach {
+            datos.forEach {
                 Text(
-                    it,
+                    it.etiqueta,
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
