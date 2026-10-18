@@ -3,6 +3,7 @@ package com.tecsup.lavacampus.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.LocalLaundryService
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,6 +23,8 @@ import androidx.navigation.navArgument
 import com.tecsup.lavacampus.data.prefs.PreferenciasStore
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.Rol
+import com.tecsup.lavacampus.ui.administrador.BandejaScreen
+import com.tecsup.lavacampus.ui.administrador.GestionPedidoScreen
 import com.tecsup.lavacampus.ui.administrador.PanelScreen
 import com.tecsup.lavacampus.ui.administrador.ServiciosScreen
 import com.tecsup.lavacampus.ui.components.AppTopBar
@@ -33,7 +36,9 @@ import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.estudiante.TarifasScreen
 import com.tecsup.lavacampus.ui.theme.LavaTheme
+import com.tecsup.lavacampus.viewmodel.BandejaViewModel
 import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
+import com.tecsup.lavacampus.viewmodel.GestionPedidoViewModel
 import com.tecsup.lavacampus.viewmodel.InicioViewModel
 import com.tecsup.lavacampus.viewmodel.LavaViewModelFactory
 import com.tecsup.lavacampus.viewmodel.MisPedidosViewModel
@@ -167,6 +172,9 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
             LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
                 Scaffold(topBar = {
                     AppTopBar("Panel", acciones = {
+                        IconButton(onClick = { nav.navigate(Rutas.BANDEJA) }) {
+                            Icon(Icons.Default.Inbox, contentDescription = "Pedidos")
+                        }
                         IconButton(onClick = { nav.navigate(Rutas.SERVICIOS) }) {
                             Icon(Icons.Default.LocalLaundryService, contentDescription = "Servicios")
                         }
@@ -177,9 +185,39 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                 }) { padding ->
                     PanelScreen(
                         vm = vm,
-                        onVerListos = { },
+                        onVerListos = { nav.navigate(Rutas.BANDEJA) },
                         modifier = Modifier.padding(padding)
                     )
+                }
+            }
+        }
+
+        composable(Rutas.BANDEJA) {
+            val vm: BandejaViewModel = viewModel(factory = LavaViewModelFactory { BandejaViewModel(repo) })
+            LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
+                Scaffold(topBar = {
+                    AppTopBar("Pedidos", onAtras = { nav.popBackStack() })
+                }) { padding ->
+                    BandejaScreen(
+                        vm = vm,
+                        onAbrir = { nav.navigate(Rutas.gestionPedido(it)) },
+                        modifier = Modifier.padding(padding)
+                    )
+                }
+            }
+        }
+
+        composable(
+            Rutas.GESTION_PEDIDO,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("id") ?: 0
+            val vm: GestionPedidoViewModel = viewModel(factory = LavaViewModelFactory { GestionPedidoViewModel(repo, id) })
+            LavaTheme(rol = Rol.ADMIN, oscuro = oscuro) {
+                Scaffold(topBar = {
+                    AppTopBar("Gestionar pedido", onAtras = { nav.popBackStack() })
+                }) { padding ->
+                    GestionPedidoScreen(vm = vm, modifier = Modifier.padding(padding))
                 }
             }
         }

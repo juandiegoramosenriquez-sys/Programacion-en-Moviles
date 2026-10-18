@@ -5,5 +5,12 @@ enum class EstadoPedido(val etiqueta: String) {
     EN_PROCESO("En proceso"),
     LISTO("Listo"),
     ENTREGADO("Entregado"),
-    CANCELADO("Cancelado")
+    CANCELADO("Cancelado");
+
+    fun siguiente(): EstadoPedido? = when (this) {
+        RECIBIDO -> EN_PROCESO
+        EN_PROCESO -> LISTO
+        LISTO -> ENTREGADO
+        else -> null
+    }
 }
