@@ -47,6 +47,7 @@ fun NuevoPedidoScreen(
     val fechaEntrega by vm.fechaEntrega.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
     val creado by vm.creado.collectAsState()
+    val recibiendo by vm.recibiendo.collectAsState()
 
     LaunchedEffect(creado) {
         if (creado) onCreado()
@@ -59,6 +60,23 @@ fun NuevoPedidoScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        if (!recibiendo) {
+            item {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "La lavandería no está recibiendo pedidos",
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+        }
+
         item {
             Text("Elige tus servicios", style = MaterialTheme.typography.titleMedium)
         }
@@ -117,7 +135,7 @@ fun NuevoPedidoScreen(
         }
 
         item {
-            LavaButton("Confirmar pedido", onClick = vm::confirmar, enabled = elegidos.isNotEmpty())
+            LavaButton("Confirmar pedido", onClick = vm::confirmar, enabled = elegidos.isNotEmpty() && recibiendo)
         }
     }
 }

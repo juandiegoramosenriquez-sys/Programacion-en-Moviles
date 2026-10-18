@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.data.repository.LavaRepository
 import com.tecsup.lavacampus.model.EstadoPedido
+import com.tecsup.lavacampus.model.Unidad
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -27,6 +28,19 @@ class MisPedidosViewModel(
     val historial: StateFlow<List<PedidoConDetalle>> = pedidos
         .map { lista -> lista.filter { EstadoPedido.valueOf(it.pedido.estado) !in estadosActivos } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val totalPedidos: StateFlow<Int> = pedidos
+        .map { it.size }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val kilosLavados: StateFlow<Double> = pedidos
+        .map { lista ->
+            lista.filter { it.pedido.estado != EstadoPedido.CANCELADO.name }
+                .flatMap { it.detalles }
+                .filter { it.servicio.unidad == Unidad.KG.name }
+                .sumOf { it.detalle.cantidad }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     fun puedeCancelar(p: PedidoConDetalle): Boolean = p.pedido.estado == EstadoPedido.RECIBIDO.name
 
