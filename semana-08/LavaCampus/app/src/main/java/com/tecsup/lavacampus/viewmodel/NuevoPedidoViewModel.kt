@@ -40,9 +40,20 @@ class NuevoPedidoViewModel(
     private val _creado = MutableStateFlow(false)
     val creado: StateFlow<Boolean> = _creado
 
-    val total: StateFlow<Double> = combine(servicios, _cantidades) { lista, cantidades ->
+    val subtotal: StateFlow<Double> = combine(servicios, _cantidades) { lista, cantidades ->
         lista.sumOf { (cantidades[it.id] ?: 0.0) * it.precio }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
+
+    val kilosLavado: StateFlow<Double> = combine(servicios, _cantidades) { lista, cantidades ->
+        lista.filter { it.unidad == Unidad.KG.name }.sumOf { cantidades[it.id] ?: 0.0 }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
+
+    val descuento: StateFlow<Double> = combine(servicios, _cantidades) { lista, cantidades ->
+        calcularDescuento(lista, cantidades)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
+
+    val total: StateFlow<Double> = combine(subtotal, descuento) { sub, desc -> sub - desc }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 0.0)
 
     val fechaEntrega: StateFlow<String> = combine(servicios, _cantidades) { lista, cantidades ->
         calcularFecha(lista.filter { (cantidades[it.id] ?: 0.0) > 0.0 })
@@ -81,9 +92,16 @@ class NuevoPedidoViewModel(
                 return@launch
             }
             val lineas = elegidos.map { LineaPedido(it.id, _cantidades.value.getValue(it.id)) }
-            repo.crearPedido(usuarioId, lineas, calcularFecha(elegidos), _nota.value.trim())
+            repo.crearPedido(usuarioId, lineas, calcularFecha(elegidos), _nota.value.trim(), calcularDescuento(elegidos, _cantidades.value))
             _creado.value = true
         }
+    }
+
+    private fun calcularDescuento(lista: List<Servicio>, cantidades: Map<Int, Double>): Double {
+        val lavado = lista.filter { it.unidad == Unidad.KG.name }
+        val kilos = lavado.sumOf { cantidades[it.id] ?: 0.0 }
+        if (kilos <= KILOS_PARA_DESCUENTO) return 0.0
+        return lavado.sumOf { (cantidades[it.id] ?: 0.0) * it.precio } * PORCENTAJE_DESCUENTO
     }
 
     private fun calcularFecha(elegidos: List<Servicio>): String {
@@ -92,5 +110,10 @@ class NuevoPedidoViewModel(
         var fecha = LocalDate.now().plusDays(dias.toLong())
         if (fecha.dayOfWeek == DayOfWeek.SUNDAY) fecha = fecha.plusDays(1)
         return fecha.toString()
+    }
+
+    companion object {
+        const val KILOS_PARA_DESCUENTO = 5.0
+        const val PORCENTAJE_DESCUENTO = 0.10
     }
 }

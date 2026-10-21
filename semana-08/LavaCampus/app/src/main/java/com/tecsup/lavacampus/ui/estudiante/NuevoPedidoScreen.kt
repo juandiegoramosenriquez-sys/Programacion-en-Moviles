@@ -32,6 +32,7 @@ import com.tecsup.lavacampus.ui.components.LavaTextField
 import com.tecsup.lavacampus.ui.components.SelectorCantidad
 import com.tecsup.lavacampus.ui.components.formatoSoles
 import com.tecsup.lavacampus.ui.components.textoCantidad
+import com.tecsup.lavacampus.ui.theme.EstadoListo
 import com.tecsup.lavacampus.viewmodel.NuevoPedidoViewModel
 
 @Composable
@@ -43,6 +44,9 @@ fun NuevoPedidoScreen(
     val servicios by vm.servicios.collectAsState()
     val cantidades by vm.cantidades.collectAsState()
     val nota by vm.nota.collectAsState()
+    val subtotal by vm.subtotal.collectAsState()
+    val descuento by vm.descuento.collectAsState()
+    val kilos by vm.kilosLavado.collectAsState()
     val total by vm.total.collectAsState()
     val fechaEntrega by vm.fechaEntrega.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
@@ -116,9 +120,32 @@ fun NuevoPedidoScreen(
                         }
                     }
                     HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                    if (descuento > 0.0) {
+                        Row(Modifier.fillMaxWidth()) {
+                            Text("Subtotal", modifier = Modifier.weight(1f))
+                            Text(formatoSoles(subtotal))
+                        }
+                        Row(Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
+                            Text(
+                                "Descuento por volumen (10 % del lavado)",
+                                color = EstadoListo,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text("- ${formatoSoles(descuento)}", color = EstadoListo, fontWeight = FontWeight.SemiBold)
+                        }
+                    }
                     Row(Modifier.fillMaxWidth()) {
                         Text("Total", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                         Text(formatoSoles(total), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    }
+                    if (descuento == 0.0 && kilos > 0.0) {
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Lava más de 5 kg y obtén 10 % de descuento en el lavado",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     if (fechaEntrega.isNotEmpty()) {
                         Spacer(Modifier.height(4.dp))

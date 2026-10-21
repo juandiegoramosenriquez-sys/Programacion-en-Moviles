@@ -96,6 +96,12 @@ fun DetallePedidoScreen(vm: DetallePedidoViewModel, modifier: Modifier = Modifie
                 }
             }
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            if (pedido.descuento > 0.0) {
+                Row(Modifier.fillMaxWidth().padding(bottom = 4.dp)) {
+                    Text("Descuento por volumen", color = EstadoListo, modifier = Modifier.weight(1f))
+                    Text("- ${formatoSoles(pedido.descuento)}", color = EstadoListo)
+                }
+            }
             Row(Modifier.fillMaxWidth()) {
                 Text("Total", fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                 Text(formatoSoles(pedido.total), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
