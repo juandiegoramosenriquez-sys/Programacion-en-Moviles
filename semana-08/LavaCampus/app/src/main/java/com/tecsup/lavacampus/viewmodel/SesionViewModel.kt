@@ -33,6 +33,14 @@ class SesionViewModel(
     val recibirPedidos: StateFlow<Boolean> = prefs.recibirPedidos
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
+    val limitePedidos: StateFlow<Int> = prefs.limitePedidos
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 3)
+
+    fun cambiarLimitePedidos(limite: Int) {
+        if (limite !in 1..5) return
+        viewModelScope.launch { prefs.guardarLimitePedidos(limite) }
+    }
+
     fun cambiarModoOscuro(activo: Boolean) {
         viewModelScope.launch { prefs.guardarModoOscuro(activo) }
     }

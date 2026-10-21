@@ -27,6 +27,9 @@ class NuevoPedidoViewModel(
     val recibiendo: StateFlow<Boolean> = prefs.recibirPedidos
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
+    val limite: StateFlow<Int> = prefs.limitePedidos
+        .stateIn(viewModelScope, SharingStarted.Eagerly, 3)
+
     val servicios: StateFlow<List<Servicio>> = repo.observarServiciosActivos()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -110,8 +113,8 @@ class NuevoPedidoViewModel(
                 _mensaje.value = "La lavandería no está recibiendo pedidos"
                 return@launch
             }
-            if (repo.contarActivos(usuarioId) >= 3) {
-                _mensaje.value = "Ya tienes 3 pedidos activos"
+            if (repo.contarActivos(usuarioId) >= limite.value) {
+                _mensaje.value = if (limite.value == 1) "Ya tienes 1 pedido activo" else "Ya tienes ${limite.value} pedidos activos"
                 return@launch
             }
             val lineas = elegidos.map { LineaPedido(it.id, _cantidades.value.getValue(it.id)) }

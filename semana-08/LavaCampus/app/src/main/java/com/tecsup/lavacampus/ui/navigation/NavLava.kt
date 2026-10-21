@@ -196,7 +196,8 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
         composable(Rutas.TARIFAS) {
             val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
             Pantalla(nav, Rol.CLIENTE, oscuro, "Tarifas", conBarra = true) { modifier ->
-                TarifasScreen(vm = vm, modifier = modifier)
+                val limite by sesion.limitePedidos.collectAsState()
+                TarifasScreen(vm = vm, limite = limite, modifier = modifier)
             }
         }
 

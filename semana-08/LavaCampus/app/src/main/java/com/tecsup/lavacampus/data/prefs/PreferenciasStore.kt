@@ -19,12 +19,14 @@ class PreferenciasStore(private val context: Context) {
     private val oscuroKey = booleanPreferencesKey("modoOscuro")
     private val notificacionesKey = booleanPreferencesKey("notificaciones")
     private val recibirKey = booleanPreferencesKey("recibirPedidos")
+    private val limiteKey = intPreferencesKey("limitePedidos")
 
     val perfilActivo: Flow<String> = context.dataStore.data.map { it[perfilKey] ?: "" }
     val usuarioId: Flow<Int> = context.dataStore.data.map { it[usuarioKey] ?: 0 }
     val modoOscuro: Flow<Boolean> = context.dataStore.data.map { it[oscuroKey] ?: false }
     val notificaciones: Flow<Boolean> = context.dataStore.data.map { it[notificacionesKey] ?: true }
     val recibirPedidos: Flow<Boolean> = context.dataStore.data.map { it[recibirKey] ?: true }
+    val limitePedidos: Flow<Int> = context.dataStore.data.map { it[limiteKey] ?: 3 }
 
     suspend fun guardarSesion(rol: Rol, usuarioId: Int) {
         context.dataStore.edit {
@@ -43,6 +45,10 @@ class PreferenciasStore(private val context: Context) {
 
     suspend fun guardarRecibirPedidos(activo: Boolean) {
         context.dataStore.edit { it[recibirKey] = activo }
+    }
+
+    suspend fun guardarLimitePedidos(limite: Int) {
+        context.dataStore.edit { it[limiteKey] = limite }
     }
 
     suspend fun cerrarSesion() {

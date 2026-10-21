@@ -38,7 +38,7 @@ fun Servicio.textoPrecio(): String {
 }
 
 @Composable
-fun TarifasScreen(vm: ServiciosViewModel, modifier: Modifier = Modifier) {
+fun TarifasScreen(vm: ServiciosViewModel, limite: Int, modifier: Modifier = Modifier) {
     val servicios by vm.activos.collectAsState()
 
     LazyColumn(
@@ -89,7 +89,7 @@ fun TarifasScreen(vm: ServiciosViewModel, modifier: Modifier = Modifier) {
                     Spacer(Modifier.height(12.dp))
                     Text("Reglas", style = MaterialTheme.typography.titleMedium)
                     Text("• Mínimo 1 kg en lavado por kilo")
-                    Text("• Máximo 3 pedidos activos por estudiante")
+                    Text(if (limite == 1) "• Máximo 1 pedido activo por estudiante" else "• Máximo $limite pedidos activos por estudiante")
                     Text("• Se paga al recoger en el casillero")
                 }
             }
