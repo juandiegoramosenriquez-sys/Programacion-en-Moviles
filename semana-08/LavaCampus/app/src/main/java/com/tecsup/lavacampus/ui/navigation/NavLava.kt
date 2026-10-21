@@ -134,7 +134,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                 InicioScreen(
                     usuario = usuario,
                     vm = vm,
-                    onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
+                    onNuevoPedido = { nav.navigate(Rutas.nuevoPedido()) },
                     onMisPedidos = { irPestana(nav, Rutas.MIS_PEDIDOS, Rutas.INICIO) },
                     onTarifas = { irPestana(nav, Rutas.TARIFAS, Rutas.INICIO) },
                     onPedido = { nav.navigate(Rutas.detallePedido(it)) },
@@ -143,10 +143,18 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
             }
         }
 
-        composable(Rutas.NUEVO_PEDIDO) {
+        composable(
+            Rutas.NUEVO_PEDIDO,
+            arguments = listOf(navArgument("repetir") {
+                type = NavType.IntType
+                defaultValue = 0
+            })
+        ) { entrada ->
             val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
-            val vm: NuevoPedidoViewModel = viewModel(factory = LavaViewModelFactory { NuevoPedidoViewModel(repo, usuario.id, prefs) })
-            Pantalla(nav, Rol.CLIENTE, oscuro, "Nuevo pedido", conBarra = false) { modifier ->
+            val repetir = entrada.arguments?.getInt("repetir") ?: 0
+            val vm: NuevoPedidoViewModel = viewModel(factory = LavaViewModelFactory { NuevoPedidoViewModel(repo, usuario.id, prefs, repetir) })
+            val titulo = if (repetir == 0) "Nuevo pedido" else "Pedir de nuevo"
+            Pantalla(nav, Rol.CLIENTE, oscuro, titulo, conBarra = false) { modifier ->
                 NuevoPedidoScreen(
                     vm = vm,
                     onCreado = {
@@ -178,7 +186,8 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                 MisPedidosScreen(
                     vm = vm,
                     onPedido = { nav.navigate(Rutas.detallePedido(it)) },
-                    onNuevoPedido = { nav.navigate(Rutas.NUEVO_PEDIDO) },
+                    onNuevoPedido = { nav.navigate(Rutas.nuevoPedido()) },
+                    onRepetir = { nav.navigate(Rutas.nuevoPedido(it)) },
                     modifier = modifier
                 )
             }
