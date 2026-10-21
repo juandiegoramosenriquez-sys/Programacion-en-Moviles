@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.ui.components.formatoSoles
 import com.tecsup.lavacampus.ui.components.graficos.GraficoBarras
 import com.tecsup.lavacampus.ui.components.graficos.GraficoDona
+import com.tecsup.lavacampus.ui.theme.EstadoCancelado
 import com.tecsup.lavacampus.ui.theme.EstadoEnProceso
 import com.tecsup.lavacampus.ui.theme.EstadoListo
 import com.tecsup.lavacampus.ui.theme.EstadoRecibido
@@ -41,7 +42,7 @@ import com.tecsup.lavacampus.viewmodel.PanelViewModel
 @Composable
 fun PanelScreen(
     vm: PanelViewModel,
-    onVerListos: () -> Unit,
+    onVerPedidos: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val pedidosHoy by vm.pedidosHoy.collectAsState()
@@ -50,6 +51,7 @@ fun PanelScreen(
     val ingresos by vm.ingresosSemana.collectAsState()
     val porEstado by vm.porEstado.collectAsState()
     val porServicio by vm.porServicio.collectAsState()
+    val atrasados by vm.atrasados.collectAsState()
 
     Column(
         modifier = modifier
@@ -93,8 +95,31 @@ fun PanelScreen(
                         modifier = Modifier.weight(1f)
                     )
                     Button(
-                        onClick = onVerListos,
+                        onClick = onVerPedidos,
                         colors = ButtonDefaults.buttonColors(containerColor = EstadoListo)
+                    ) {
+                        Text("Ver")
+                    }
+                }
+            }
+        }
+
+        if (atrasados > 0) {
+            Card(
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = EstadoCancelado.copy(alpha = 0.12f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        "$atrasados pedidos atrasados: ya pasó su fecha de entrega",
+                        color = EstadoCancelado,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Button(
+                        onClick = onVerPedidos,
+                        colors = ButtonDefaults.buttonColors(containerColor = EstadoCancelado)
                     ) {
                         Text("Ver")
                     }

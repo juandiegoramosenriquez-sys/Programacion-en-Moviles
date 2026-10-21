@@ -1,5 +1,6 @@
 package com.tecsup.lavacampus.ui.administrador
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,9 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -24,9 +27,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.model.EstadoPedido
 import com.tecsup.lavacampus.ui.components.PedidoCard
+import com.tecsup.lavacampus.ui.theme.EstadoCancelado
 import com.tecsup.lavacampus.viewmodel.BandejaViewModel
 
 @Composable
@@ -38,6 +43,8 @@ fun BandejaScreen(
     val pedidos by vm.pedidos.collectAsState()
     val filtro by vm.filtro.collectAsState()
     val busqueda by vm.busqueda.collectAsState()
+    val atrasados by vm.atrasados.collectAsState()
+    val soloAtrasados by vm.soloAtrasados.collectAsState()
 
     val opciones = listOf(
         null to "Todos",
@@ -66,11 +73,21 @@ fun BandejaScreen(
         ) {
             opciones.forEach { (estado, texto) ->
                 FilterChip(
-                    selected = filtro == estado,
+                    selected = !soloAtrasados && filtro == estado,
                     onClick = { vm.elegirFiltro(estado) },
                     label = { Text(texto) }
                 )
             }
+            FilterChip(
+                selected = soloAtrasados,
+                onClick = vm::verAtrasados,
+                label = { Text("Atrasados (${atrasados.size})") },
+                colors = FilterChipDefaults.filterChipColors(
+                    labelColor = EstadoCancelado,
+                    selectedContainerColor = EstadoCancelado.copy(alpha = 0.15f),
+                    selectedLabelColor = EstadoCancelado
+                )
+            )
         }
 
         LazyColumn(
@@ -80,19 +97,37 @@ fun BandejaScreen(
         ) {
             if (pedidos.isEmpty()) {
                 item {
-                    Text("No hay pedidos", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        if (soloAtrasados) "No hay pedidos atrasados" else "No hay pedidos",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             items(pedidos, key = { it.pedido.id }) { p ->
                 val estado = EstadoPedido.valueOf(p.pedido.estado)
+                val atrasado = p.pedido.id in atrasados
                 PedidoCard(
                     numero = p.pedido.id,
                     fecha = p.usuario.nombre,
                     resumen = p.detalles.joinToString { it.servicio.nombre },
                     total = p.pedido.total,
                     estado = estado,
-                    onClick = { onAbrir(p.pedido.id) }
+                    onClick = { onAbrir(p.pedido.id) },
+                    modifier = if (atrasado) {
+                        Modifier.border(2.dp, EstadoCancelado, RoundedCornerShape(16.dp))
+                    } else {
+                        Modifier
+                    }
                 ) {
+                    if (atrasado) {
+                        Text(
+                            "Atrasado ${textoDias(vm.diasAtraso(p))} · debía entregarse el ${p.pedido.fechaEntrega}",
+                            color = EstadoCancelado,
+                            fontWeight = FontWeight.SemiBold,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
                     val accion = when (estado) {
                         EstadoPedido.RECIBIDO -> "Iniciar"
                         EstadoPedido.EN_PROCESO -> "Marcar listo"
@@ -113,3 +148,5 @@ fun BandejaScreen(
         }
     }
 }
+
+private fun textoDias(dias: Long): String = if (dias == 1L) "1 día" else "$dias días"

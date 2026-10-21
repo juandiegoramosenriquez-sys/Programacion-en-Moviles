@@ -211,7 +211,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
             Pantalla(nav, Rol.ADMIN, oscuro, "Panel", conBarra = true) { modifier ->
                 PanelScreen(
                     vm = vm,
-                    onVerListos = { irPestana(nav, Rutas.BANDEJA, Rutas.PANEL) },
+                    onVerPedidos = { irPestana(nav, Rutas.BANDEJA, Rutas.PANEL) },
                     modifier = modifier
                 )
             }
