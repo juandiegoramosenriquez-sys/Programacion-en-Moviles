@@ -50,7 +50,8 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
         usuarioId: Int,
         lineas: List<LineaPedido>,
         fechaEntrega: String,
-        nota: String
+        nota: String,
+        descuento: Double
     ): Long = db.withTransaction {
         val detalles = lineas.map { linea ->
             val servicio = servicioDao.obtener(linea.servicioId) ?: error("Servicio no encontrado")
@@ -68,7 +69,8 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
                 fechaRegistro = LocalDate.now().toString(),
                 fechaEntrega = fechaEntrega,
                 estado = EstadoPedido.RECIBIDO.name,
-                total = detalles.sumOf { it.subtotal },
+                total = detalles.sumOf { it.subtotal } - descuento,
+                descuento = descuento,
                 pagado = false,
                 nota = nota
             )

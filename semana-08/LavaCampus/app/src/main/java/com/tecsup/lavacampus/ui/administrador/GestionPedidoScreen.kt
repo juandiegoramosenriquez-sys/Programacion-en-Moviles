@@ -35,6 +35,7 @@ import com.tecsup.lavacampus.ui.components.LavaButton
 import com.tecsup.lavacampus.ui.components.StepperEstado
 import com.tecsup.lavacampus.ui.components.formatoSoles
 import com.tecsup.lavacampus.ui.components.textoCantidad
+import com.tecsup.lavacampus.ui.theme.EstadoListo
 import com.tecsup.lavacampus.viewmodel.GestionPedidoViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -119,6 +120,13 @@ fun GestionPedidoScreen(vm: GestionPedidoViewModel, modifier: Modifier = Modifie
                 }
             }
             Spacer(Modifier.height(8.dp))
+            if (pedido.descuento > 0.0) {
+                Text(
+                    "Descuento por volumen: - ${formatoSoles(pedido.descuento)}",
+                    color = EstadoListo,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text("Total ${formatoSoles(pedido.total)}", fontWeight = FontWeight.Bold)
