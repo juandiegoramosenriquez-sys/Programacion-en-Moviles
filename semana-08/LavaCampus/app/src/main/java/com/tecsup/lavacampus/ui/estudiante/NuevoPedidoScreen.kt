@@ -81,6 +81,29 @@ fun NuevoPedidoScreen(
             }
         }
 
+        if (vm.repetirId != 0) {
+            item {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(
+                            "Repitiendo el pedido #${vm.repetirId}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            "Cargamos las mismas cantidades con los precios actuales. Puedes cambiarlas antes de confirmar.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+            }
+        }
+
         item {
             Text("Elige tus servicios", style = MaterialTheme.typography.titleMedium)
         }

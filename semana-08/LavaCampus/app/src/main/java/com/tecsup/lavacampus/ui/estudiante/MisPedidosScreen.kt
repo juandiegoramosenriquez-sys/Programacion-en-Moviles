@@ -10,15 +10,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -46,6 +49,7 @@ fun MisPedidosScreen(
     vm: MisPedidosViewModel,
     onPedido: (Int) -> Unit,
     onNuevoPedido: () -> Unit,
+    onRepetir: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val activos by vm.activos.collectAsState()
@@ -99,6 +103,17 @@ fun MisPedidosScreen(
                         if (vm.puedeCancelar(p)) {
                             TextButton(onClick = { porCancelar = p }) {
                                 Text("Cancelar", color = MaterialTheme.colorScheme.error)
+                            }
+                        }
+                        if (pestana == 1) {
+                            Spacer(Modifier.height(8.dp))
+                            OutlinedButton(
+                                onClick = { onRepetir(p.pedido.id) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(Icons.Default.Replay, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text("Pedir de nuevo")
                             }
                         }
                     }

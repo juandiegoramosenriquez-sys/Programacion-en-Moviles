@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -19,7 +20,8 @@ import java.time.LocalDate
 class NuevoPedidoViewModel(
     private val repo: LavaRepository,
     private val usuarioId: Int,
-    prefs: PreferenciasStore
+    prefs: PreferenciasStore,
+    val repetirId: Int = 0
 ) : ViewModel() {
 
     val recibiendo: StateFlow<Boolean> = prefs.recibirPedidos
@@ -58,6 +60,27 @@ class NuevoPedidoViewModel(
     val fechaEntrega: StateFlow<String> = combine(servicios, _cantidades) { lista, cantidades ->
         calcularFecha(lista.filter { (cantidades[it.id] ?: 0.0) > 0.0 })
     }.stateIn(viewModelScope, SharingStarted.Eagerly, "")
+
+    init {
+        if (repetirId != 0) cargarPedidoAnterior()
+    }
+
+    private fun cargarPedidoAnterior() {
+        viewModelScope.launch {
+            val anterior = repo.observarPedido(repetirId).first() ?: return@launch
+            val activos = repo.observarServiciosActivos().first()
+            val disponibles = anterior.detalles.filter { d -> activos.any { it.id == d.servicio.id } }
+            _cantidades.value = disponibles.associate { d ->
+                val servicio = activos.first { it.id == d.servicio.id }
+                servicio.id to minOf(d.detalle.cantidad, maximo(servicio))
+            }
+            _mensaje.value = if (disponibles.size < anterior.detalles.size) {
+                "Algunos servicios del pedido #$repetirId ya no están disponibles"
+            } else {
+                null
+            }
+        }
+    }
 
     fun paso(s: Servicio): Double = if (s.unidad == Unidad.KG.name) 0.5 else 1.0
 
