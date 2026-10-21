@@ -5,6 +5,7 @@ import com.tecsup.lavacampus.data.local.entity.Usuario
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.model.ClienteResumen
 import com.tecsup.lavacampus.model.EstadoPedido
+import com.tecsup.lavacampus.model.GastoMensual
 import com.tecsup.lavacampus.model.IngresoServicio
 import com.tecsup.lavacampus.model.LineaPedido
 import kotlinx.coroutines.flow.Flow
@@ -36,4 +37,5 @@ interface LavaRepository {
     fun observarIngresosDesde(fechaInicio: String): Flow<Double>
     fun observarIngresosPorServicio(fechaInicio: String): Flow<List<IngresoServicio>>
     fun observarPedidosAtrasados(hoy: String): Flow<List<Int>>
+    fun observarGastoMensual(usuarioId: Int): Flow<List<GastoMensual>>
 }

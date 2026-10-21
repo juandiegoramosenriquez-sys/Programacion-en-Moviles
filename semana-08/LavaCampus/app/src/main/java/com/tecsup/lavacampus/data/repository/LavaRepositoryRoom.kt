@@ -9,6 +9,7 @@ import com.tecsup.lavacampus.data.local.entity.Usuario
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
 import com.tecsup.lavacampus.model.ClienteResumen
 import com.tecsup.lavacampus.model.EstadoPedido
+import com.tecsup.lavacampus.model.GastoMensual
 import com.tecsup.lavacampus.model.IngresoServicio
 import com.tecsup.lavacampus.model.LineaPedido
 import kotlinx.coroutines.flow.Flow
@@ -108,4 +109,7 @@ class LavaRepositoryRoom(private val db: LavaDatabase) : LavaRepository {
         detalleDao.observarIngresosPorServicio(fechaInicio)
 
     override fun observarPedidosAtrasados(hoy: String): Flow<List<Int>> = pedidoDao.observarAtrasados(hoy)
+
+    override fun observarGastoMensual(usuarioId: Int): Flow<List<GastoMensual>> =
+        pedidoDao.observarGastoMensual(usuarioId)
 }
