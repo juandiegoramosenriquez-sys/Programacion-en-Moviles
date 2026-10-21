@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import com.tecsup.lavacampus.data.local.entity.Pedido
 import com.tecsup.lavacampus.data.local.relation.PedidoConDetalle
+import com.tecsup.lavacampus.model.GastoMensual
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -52,4 +53,15 @@ interface PedidoDao {
 
     @Query("SELECT id FROM pedidos WHERE fechaEntrega < :hoy AND estado NOT IN ('ENTREGADO', 'CANCELADO')")
     fun observarAtrasados(hoy: String): Flow<List<Int>>
+
+    @Query(
+        """
+        SELECT substr(fechaRegistro, 1, 7) AS mes, SUM(total) AS total
+        FROM pedidos
+        WHERE usuarioId = :usuarioId AND pagado = 1
+        GROUP BY mes
+        ORDER BY mes
+        """
+    )
+    fun observarGastoMensual(usuarioId: Int): Flow<List<GastoMensual>>
 }

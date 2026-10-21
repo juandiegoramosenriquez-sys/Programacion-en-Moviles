@@ -3,8 +3,10 @@ package com.tecsup.lavacampus.ui.estudiante
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,6 +27,8 @@ import com.tecsup.lavacampus.data.local.entity.Usuario
 import com.tecsup.lavacampus.ui.components.Avatar
 import com.tecsup.lavacampus.ui.components.FilaSwitch
 import com.tecsup.lavacampus.ui.components.LavaButton
+import com.tecsup.lavacampus.ui.components.formatoSoles
+import com.tecsup.lavacampus.ui.components.graficos.GraficoLineas
 import com.tecsup.lavacampus.viewmodel.MisPedidosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
 import java.util.Locale
@@ -41,6 +45,7 @@ fun PerfilScreen(
     val activos by pedidosVm.activos.collectAsState()
     val total by pedidosVm.totalPedidos.collectAsState()
     val kilos by pedidosVm.kilosLavados.collectAsState()
+    val gastoMensual by pedidosVm.gastoMensual.collectAsState()
     val oscuro by sesion.modoOscuro.collectAsState()
     val avisos by sesion.notificaciones.collectAsState()
 
@@ -64,6 +69,30 @@ fun PerfilScreen(
             Dato("Activos", "${activos.size}", Modifier.weight(1f))
             Dato("Pedidos", "$total", Modifier.weight(1f))
             Dato("Kilos", String.format(Locale.US, "%.1f", kilos), Modifier.weight(1f))
+        }
+
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Gasto por mes", style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
+                    Text(
+                        formatoSoles(gastoMensual.sumOf { it.valor }),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Text(
+                    "Pedidos pagados en los últimos 6 meses",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(12.dp))
+                GraficoLineas(gastoMensual)
+            }
         }
 
         Card(
