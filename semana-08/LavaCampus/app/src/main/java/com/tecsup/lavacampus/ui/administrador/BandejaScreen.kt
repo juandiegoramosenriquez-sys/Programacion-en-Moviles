@@ -23,6 +23,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,6 +47,11 @@ fun BandejaScreen(
     val busqueda by vm.busqueda.collectAsState()
     val atrasados by vm.atrasados.collectAsState()
     val soloAtrasados by vm.soloAtrasados.collectAsState()
+    val lista = rememberLazyListState()
+
+    LaunchedEffect(filtro, soloAtrasados, busqueda, pedidos.firstOrNull()?.pedido?.id) {
+        lista.scrollToItem(0)
+    }
 
     val opciones = listOf(
         null to "Todos",
@@ -91,6 +98,7 @@ fun BandejaScreen(
         }
 
         LazyColumn(
+            state = lista,
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxSize()

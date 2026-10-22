@@ -11,17 +11,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.model.EstadoPedido
 import com.tecsup.lavacampus.ui.theme.colorEstado
+import com.tecsup.lavacampus.ui.theme.esModoOscuro
+import com.tecsup.lavacampus.ui.theme.fondoEstadoNoche
+import com.tecsup.lavacampus.ui.theme.textoEstadoNoche
 
 @Composable
 fun EstadoPedidoChip(estado: EstadoPedido, modifier: Modifier = Modifier) {
-    val color = colorEstado(estado)
+    val oscuro = esModoOscuro()
+    val fondo = if (oscuro) fondoEstadoNoche(estado) else colorEstado(estado).copy(alpha = 0.12f)
+    val texto = if (oscuro) textoEstadoNoche(estado) else colorEstado(estado)
     Text(
         text = estado.etiqueta,
-        color = color,
+        color = texto,
         style = MaterialTheme.typography.labelMedium,
         fontWeight = FontWeight.SemiBold,
         modifier = modifier
-            .background(color.copy(alpha = 0.12f), RoundedCornerShape(50))
+            .background(fondo, RoundedCornerShape(50))
             .padding(horizontal = 10.dp, vertical = 4.dp)
     )
 }

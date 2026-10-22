@@ -50,6 +50,7 @@ import com.tecsup.lavacampus.ui.estudiante.LoginScreen
 import com.tecsup.lavacampus.ui.estudiante.MisPedidosScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.PerfilScreen
+import com.tecsup.lavacampus.ui.estudiante.RegistroScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.estudiante.TarifasScreen
 import com.tecsup.lavacampus.ui.theme.LavaTheme
@@ -98,11 +99,9 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
     }
 
     val cambiarPerfil: () -> Unit = {
-        scope.launch {
-            val otro = sesion.cambiarPerfil() ?: return@launch
-            nav.navigate(principalDe(otro.rol)) {
-                popUpTo(nav.graph.id) { inclusive = true }
-            }
+        sesion.cambiarPerfil()
+        nav.navigate(Rutas.LOGIN) {
+            popUpTo(nav.graph.id) { inclusive = true }
         }
     }
 
@@ -120,11 +119,29 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
         }
 
         composable(Rutas.LOGIN) {
-            LoginScreen(sesion, onIngresar = { usuario ->
-                nav.navigate(principalDe(usuario.rol)) {
-                    popUpTo(Rutas.LOGIN) { inclusive = true }
-                }
-            })
+            LoginScreen(
+                sesion,
+                onIngresar = { usuario ->
+                    nav.navigate(principalDe(usuario.rol)) {
+                        popUpTo(Rutas.LOGIN) { inclusive = true }
+                    }
+                },
+                onRegistrarse = { nav.navigate(Rutas.REGISTRO) }
+            )
+        }
+
+        composable(Rutas.REGISTRO) {
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Crear cuenta", conBarra = false) { modifier ->
+                RegistroScreen(
+                    vm = sesion,
+                    onRegistrado = {
+                        nav.navigate(Rutas.INICIO) {
+                            popUpTo(nav.graph.id) { inclusive = true }
+                        }
+                    },
+                    modifier = modifier
+                )
+            }
         }
 
         composable(Rutas.INICIO) {
@@ -350,10 +367,13 @@ private fun BarraInferior(nav: NavHostController, rol: Rol) {
 }
 
 private fun irPestana(nav: NavHostController, ruta: String, raiz: String) {
+    if (ruta == raiz) {
+        nav.popBackStack(raiz, inclusive = false)
+        return
+    }
     nav.navigate(ruta) {
-        popUpTo(raiz) { saveState = true }
+        popUpTo(raiz)
         launchSingleTop = true
-        restoreState = true
     }
 }
 

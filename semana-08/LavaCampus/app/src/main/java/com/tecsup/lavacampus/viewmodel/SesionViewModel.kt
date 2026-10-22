@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 class SesionViewModel(
     private val repo: LavaRepository,
@@ -25,7 +26,7 @@ class SesionViewModel(
     val error: StateFlow<String?> = _error
 
     val modoOscuro: StateFlow<Boolean> = prefs.modoOscuro
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val notificaciones: StateFlow<Boolean> = prefs.notificaciones
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
@@ -53,13 +54,14 @@ class SesionViewModel(
         viewModelScope.launch { prefs.guardarRecibirPedidos(activo) }
     }
 
-    suspend fun cambiarPerfil(): Usuario? {
-        val actual = _usuarioActual.value ?: return null
-        val otroRol = if (actual.rol == Rol.ADMIN.name) Rol.CLIENTE else Rol.ADMIN
-        val otro = repo.obtenerUsuarioPorRol(otroRol.name) ?: return null
-        prefs.guardarSesion(otroRol, otro.id)
-        _usuarioActual.value = otro
-        return otro
+    private val _rolLogin = MutableStateFlow(Rol.CLIENTE)
+    val rolLogin: StateFlow<Rol> = _rolLogin
+
+    fun cambiarPerfil() {
+        val actual = _usuarioActual.value ?: return
+        _rolLogin.value = if (actual.rol == Rol.ADMIN.name) Rol.CLIENTE else Rol.ADMIN
+        _error.value = null
+        cerrarSesion()
     }
 
     suspend fun restaurarSesion(): Usuario? {
@@ -90,6 +92,49 @@ class SesionViewModel(
                 }
             }
         }
+    }
+
+    private val _errorRegistro = MutableStateFlow<String?>(null)
+    val errorRegistro: StateFlow<String?> = _errorRegistro
+
+    fun registrar(nombre: String, correo: String, clave: String, confirmar: String) {
+        viewModelScope.launch {
+            val correoLimpio = correo.trim().lowercase()
+            _errorRegistro.value = when {
+                nombre.isBlank() || correo.isBlank() || clave.isBlank() ->
+                    "Completa todos los campos"
+                nombre.trim().length < 3 -> "Escribe tu nombre completo"
+                !Regex("""^[^@\s]+@[^@\s]+\.[^@\s]+$""").matches(correoLimpio) -> "Escribe un correo válido"
+                clave.length < 4 -> "La contraseña debe tener al menos 4 caracteres"
+                clave != confirmar -> "Las contraseñas no coinciden"
+                repo.existeCorreo(correoLimpio) -> "Ese correo ya está registrado"
+                else -> null
+            }
+            if (_errorRegistro.value != null) return@launch
+            val nuevo = Usuario(
+                nombre = nombre.trim(),
+                codigo = generarCodigo(),
+                correo = correoLimpio,
+                clave = clave,
+                rol = Rol.CLIENTE.name
+            )
+            val id = repo.registrarUsuario(nuevo).toInt()
+            prefs.guardarSesion(Rol.CLIENTE, id)
+            _usuarioActual.value = nuevo.copy(id = id)
+        }
+    }
+
+    private suspend fun generarCodigo(): String {
+        val anio = LocalDate.now().year
+        var codigo: String
+        do {
+            codigo = "U$anio" + (10000..99999).random()
+        } while (repo.existeCodigo(codigo))
+        return codigo
+    }
+
+    fun limpiarErrorRegistro() {
+        _errorRegistro.value = null
     }
 
     fun limpiarError() {

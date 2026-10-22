@@ -1,6 +1,7 @@
 package com.tecsup.lavacampus.ui.estudiante
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,12 +37,12 @@ import com.tecsup.lavacampus.viewmodel.SesionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit) {
+fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit, onRegistrarse: () -> Unit) {
     val usuario by vm.usuarioActual.collectAsState()
     val mensaje by vm.error.collectAsState()
     val oscuro by vm.modoOscuro.collectAsState()
 
-    var rol by rememberSaveable { mutableStateOf(Rol.CLIENTE) }
+    var rol by rememberSaveable { mutableStateOf(vm.rolLogin.value) }
     var correo by rememberSaveable { mutableStateOf("") }
     var clave by rememberSaveable { mutableStateOf("") }
 
@@ -57,9 +59,10 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit) {
                     .fillMaxSize()
                     .padding(padding)
                     .padding(24.dp),
-                verticalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Spacer(Modifier.height(48.dp))
                 IconoServicio("wash", tamano = 80.dp)
                 Spacer(Modifier.height(16.dp))
                 Text("LavaCampus", style = MaterialTheme.typography.headlineSmall, color = MaterialTheme.colorScheme.primary)
@@ -78,7 +81,8 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit) {
                                 rol = opcion
                                 vm.limpiarError()
                             },
-                            shape = SegmentedButtonDefaults.itemShape(i, opciones.size)
+                            shape = SegmentedButtonDefaults.itemShape(i, opciones.size),
+                            icon = {}
                         ) {
                             Text(texto)
                         }
@@ -90,13 +94,30 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit) {
                 Spacer(Modifier.height(12.dp))
                 LavaTextField(clave, { clave = it }, "Contraseña", esClave = true)
 
-                mensaje?.let {
-                    Spacer(Modifier.height(12.dp))
-                    Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                Box(
+                    contentAlignment = Alignment.CenterStart,
+                    modifier = Modifier.fillMaxWidth().height(48.dp)
+                ) {
+                    mensaje?.let {
+                        Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                    }
                 }
 
-                Spacer(Modifier.height(24.dp))
                 LavaButton("Ingresar", onClick = { vm.login(correo, clave, rol) })
+
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxWidth().height(56.dp)
+                ) {
+                    if (rol == Rol.CLIENTE) {
+                        TextButton(onClick = {
+                            vm.limpiarError()
+                            onRegistrarse()
+                        }) {
+                            Text("¿No tienes cuenta? Regístrate")
+                        }
+                    }
+                }
             }
         }
     }

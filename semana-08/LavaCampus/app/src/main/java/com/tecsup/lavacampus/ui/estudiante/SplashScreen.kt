@@ -15,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.tecsup.lavacampus.ui.components.IconoServicio
+import com.tecsup.lavacampus.ui.theme.degradadoElectrico
+import com.tecsup.lavacampus.ui.theme.textoSobreDestacado
 import kotlinx.coroutines.delay
 
 @Composable
@@ -23,9 +25,8 @@ fun SplashScreen(onTerminar: () -> Unit) {
         delay(1500)
         onTerminar()
     }
-    val colores = MaterialTheme.colorScheme
     Box(
-        modifier = Modifier.fillMaxSize().background(colores.primary),
+        modifier = Modifier.fillMaxSize().background(degradadoElectrico()),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -34,11 +35,11 @@ fun SplashScreen(onTerminar: () -> Unit) {
         ) {
             IconoServicio("wash", tamano = 96.dp)
             Spacer(Modifier.height(16.dp))
-            Text("LavaCampus", style = MaterialTheme.typography.headlineSmall, color = colores.onPrimary)
+            Text("LavaCampus", style = MaterialTheme.typography.headlineSmall, color = textoSobreDestacado())
             Text(
                 "Lavandería universitaria",
                 style = MaterialTheme.typography.bodyMedium,
-                color = colores.onPrimary.copy(alpha = 0.8f)
+                color = textoSobreDestacado().copy(alpha = 0.8f)
             )
         }
     }
