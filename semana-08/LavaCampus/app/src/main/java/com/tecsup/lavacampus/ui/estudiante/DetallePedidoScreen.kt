@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.outlined.ReceiptLong
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -47,7 +49,7 @@ import com.tecsup.lavacampus.ui.theme.EstadoRecibido
 import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
 
 @Composable
-fun DetallePedidoScreen(vm: DetallePedidoViewModel, modifier: Modifier = Modifier) {
+fun DetallePedidoScreen(vm: DetallePedidoViewModel, onVerRecibo: () -> Unit, modifier: Modifier = Modifier) {
     val detalle by vm.pedido.collectAsState()
     val puedeCancelar by vm.puedeCancelar.collectAsState()
     val puedeCalificar by vm.puedeCalificar.collectAsState()
@@ -155,6 +157,12 @@ fun DetallePedidoScreen(vm: DetallePedidoViewModel, modifier: Modifier = Modifie
                     }
                 }
             }
+        }
+
+        OutlinedButton(onClick = onVerRecibo, modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.AutoMirrored.Outlined.ReceiptLong, contentDescription = null)
+            Spacer(Modifier.width(8.dp))
+            Text("Ver recibo")
         }
 
         if (estado != EstadoPedido.CANCELADO && estado != EstadoPedido.ENTREGADO) {

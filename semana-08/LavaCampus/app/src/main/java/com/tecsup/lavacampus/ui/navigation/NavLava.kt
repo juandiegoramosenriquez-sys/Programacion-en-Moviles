@@ -50,6 +50,7 @@ import com.tecsup.lavacampus.ui.estudiante.LoginScreen
 import com.tecsup.lavacampus.ui.estudiante.MisPedidosScreen
 import com.tecsup.lavacampus.ui.estudiante.NuevoPedidoScreen
 import com.tecsup.lavacampus.ui.estudiante.PerfilScreen
+import com.tecsup.lavacampus.ui.estudiante.ReciboScreen
 import com.tecsup.lavacampus.ui.estudiante.RegistroScreen
 import com.tecsup.lavacampus.ui.estudiante.SplashScreen
 import com.tecsup.lavacampus.ui.estudiante.TarifasScreen
@@ -192,7 +193,22 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
             val id = entrada.arguments?.getInt("id") ?: 0
             val vm: DetallePedidoViewModel = viewModel(factory = LavaViewModelFactory { DetallePedidoViewModel(repo, id) })
             Pantalla(nav, Rol.CLIENTE, oscuro, "Detalle del pedido", conBarra = false) { modifier ->
-                DetallePedidoScreen(vm = vm, modifier = modifier)
+                DetallePedidoScreen(
+                    vm = vm,
+                    onVerRecibo = { nav.navigate(Rutas.recibo(id)) },
+                    modifier = modifier
+                )
+            }
+        }
+
+        composable(
+            Rutas.RECIBO,
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("id") ?: 0
+            val vm: DetallePedidoViewModel = viewModel(factory = LavaViewModelFactory { DetallePedidoViewModel(repo, id) })
+            Pantalla(nav, Rol.CLIENTE, oscuro, "Recibo", conBarra = false) { modifier ->
+                ReciboScreen(vm = vm, modifier = modifier)
             }
         }
 

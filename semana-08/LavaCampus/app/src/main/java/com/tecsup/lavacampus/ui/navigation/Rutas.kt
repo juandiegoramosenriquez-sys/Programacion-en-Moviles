@@ -8,6 +8,7 @@ object Rutas {
     const val INICIO = "inicio"
     const val NUEVO_PEDIDO = "nuevo_pedido?repetir={repetir}"
     const val DETALLE_PEDIDO = "detalle_pedido/{id}"
+    const val RECIBO = "recibo/{id}"
     const val MIS_PEDIDOS = "mis_pedidos"
     const val TARIFAS = "tarifas"
     const val PERFIL = "perfil"
@@ -22,6 +23,7 @@ object Rutas {
 
     fun nuevoPedido(repetir: Int = 0) = "nuevo_pedido?repetir=$repetir"
     fun detallePedido(id: Int) = "detalle_pedido/$id"
+    fun recibo(id: Int) = "recibo/$id"
     fun gestionPedido(id: Int) = "gestion_pedido/$id"
     fun formularioServicio(id: Int) = "formulario_servicio/$id"
 }
