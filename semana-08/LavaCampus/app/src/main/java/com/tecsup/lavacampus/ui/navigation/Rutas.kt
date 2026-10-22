@@ -3,6 +3,7 @@ package com.tecsup.lavacampus.ui.navigation
 object Rutas {
     const val SPLASH = "splash"
     const val LOGIN = "login"
+    const val REGISTRO = "registro"
 
     const val INICIO = "inicio"
     const val NUEVO_PEDIDO = "nuevo_pedido?repetir={repetir}"

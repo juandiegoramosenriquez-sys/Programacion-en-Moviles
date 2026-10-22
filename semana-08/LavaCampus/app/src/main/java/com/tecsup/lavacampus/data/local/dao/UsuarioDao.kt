@@ -16,11 +16,17 @@ interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE id = :id")
     suspend fun obtener(id: Int): Usuario?
 
-    @Query("SELECT * FROM usuarios WHERE rol = :rol ORDER BY id LIMIT 1")
-    suspend fun obtenerPorRol(rol: String): Usuario?
-
     @Insert
     suspend fun insertarTodos(lista: List<Usuario>)
+
+    @Insert
+    suspend fun insertar(u: Usuario): Long
+
+    @Query("SELECT COUNT(*) FROM usuarios WHERE correo = :correo")
+    suspend fun contarPorCorreo(correo: String): Int
+
+    @Query("SELECT COUNT(*) FROM usuarios WHERE codigo = :codigo")
+    suspend fun contarPorCodigo(codigo: String): Int
 
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int
