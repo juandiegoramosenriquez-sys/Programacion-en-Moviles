@@ -210,3 +210,53 @@ Porque los ViewModels dependen del contrato y no de Room. En la Semana 9 se pued
 | 13 | feat(administrador): agrega bandeja y gestion de pedidos con casilleros |
 | 14 | feat: agrega servicios, clientes, ajustes y cambio de perfil |
 | 15 | docs: agrega README con estructura y capturas |
+
+---
+
+# Fase 2 · Mejoras con IA (rama `mejora-ia`)
+
+Sobre la app de la Fase 1 se agregaron mejoras con ayuda de IA sin romper MVVM + Repository. Todos los prompts, lo que generó la IA, lo que se corrigió y las capturas de cada mejora están en **[PROMPTS.md](PROMPTS.md)**.
+
+## Mejoras del PDF (las 6)
+
+| Mejora | Qué hace | Commit |
+|---|---|---|
+| Pedidos atrasados | La bandeja marca en rojo los pedidos con la fecha de entrega vencida, con los días de atraso y un filtro propio; el Panel los cuenta | `ia: agrega pedidos atrasados en la bandeja` |
+| Descuento por volumen | Más de 5 kg de lavado = 10 % de descuento sobre el lavado, visible en el resumen y guardado en el pedido (base versión 3) | `ia: agrega descuento por volumen` |
+| Repetir un pedido | Desde el Historial, "Pedir de nuevo" carga las mismas cantidades con los precios actuales | `ia: agrega repetir un pedido` |
+| Gráfico de gasto mensual | En Perfil, una línea con lo pagado en los últimos 6 meses (`GraficoLineas` con Canvas) | `ia: agrega grafico de gasto mensual` |
+| Calificación del pedido | El estudiante califica de 1 a 5 estrellas un pedido entregado; el Panel muestra el promedio (base versión 4) | `ia: agrega calificacion del pedido con promedio en el panel` |
+| Recibo del pedido | Pantalla de recibo con todo el detalle y botón para compartirlo como texto | `ia: agrega recibo del pedido para compartir como texto` |
+
+## Mejoras propias
+
+| Mejora | Qué hace | Commit |
+|---|---|---|
+| Límite configurable | El administrador elige en Ajustes el máximo de pedidos activos (1 a 5, por defecto 3) | `ia: agrega limite de pedidos activos configurable` |
+| Registro de estudiantes | "Crear cuenta" desde el Login; el código de estudiante se genera solo y no se repite | `ia: agrega registro de estudiantes, cambio de perfil seguro y rediseno electrico con modo oscuro` |
+| Cambio de perfil seguro | Cambiar de perfil abre el Login con el otro rol, ya no entra sin contraseña | (mismo commit) |
+| Diseño eléctrico y modo oscuro | Degradado del tono oscuro al neón con los colores del PDF, modo oscuro con negros teñidos, estados en neón, títulos con serifa y letras más cómodas | (mismo commit) |
+
+## Capturas de la Fase 2
+
+| Inicio | Pedir de nuevo | Gasto mensual | Registro |
+|:---:|:---:|:---:|:---:|
+| <img src="capturas-ia/estudiante_inicio.jpg" width="200"/> | <img src="capturas-ia/pedir_de_nuevo.jpg" width="200"/> | <img src="capturas-ia/perfil_grafico_gasto.jpg" width="200"/> | <img src="capturas-ia/registro.jpg" width="200"/> |
+
+| Panel claro | Panel oscuro | Bandeja con atrasados | Casilleros |
+|:---:|:---:|:---:|:---:|
+| <img src="capturas-ia/panel_claro.jpg" width="200"/> | <img src="capturas-ia/panel_oscuro.jpg" width="200"/> | <img src="capturas-ia/bandeja_atrasados.jpg" width="200"/> | <img src="capturas-ia/gestion_casilleros.jpg" width="200"/> |
+
+## Commits de la Fase 2
+
+| Commit |
+|---|
+| ia: agrega pedidos atrasados en la bandeja |
+| ia: agrega descuento por volumen |
+| ia: agrega repetir un pedido |
+| ia: agrega limite de pedidos activos configurable |
+| ia: agrega grafico de gasto mensual |
+| ia: agrega registro de estudiantes, cambio de perfil seguro y rediseno electrico con modo oscuro |
+| ia: agrega calificacion del pedido con promedio en el panel |
+| ia: agrega recibo del pedido para compartir como texto |
+| docs: agrega PROMPTS.md |
