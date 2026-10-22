@@ -40,4 +40,7 @@ interface LavaRepository {
     fun observarIngresosPorServicio(fechaInicio: String): Flow<List<IngresoServicio>>
     fun observarPedidosAtrasados(hoy: String): Flow<List<Int>>
     fun observarGastoMensual(usuarioId: Int): Flow<List<GastoMensual>>
+    suspend fun calificarPedido(id: Int, estrellas: Int)
+    fun observarPromedioCalificacion(): Flow<Double?>
+    fun observarCantidadCalificados(): Flow<Int>
 }

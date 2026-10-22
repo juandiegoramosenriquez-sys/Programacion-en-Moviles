@@ -24,6 +24,8 @@ import androidx.compose.material.icons.filled.DonutLarge
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -45,11 +47,13 @@ import com.tecsup.lavacampus.ui.components.graficos.GraficoBarras
 import com.tecsup.lavacampus.ui.components.graficos.GraficoDona
 import com.tecsup.lavacampus.ui.theme.EstadoCancelado
 import com.tecsup.lavacampus.ui.theme.EstadoListo
+import com.tecsup.lavacampus.ui.theme.EstadoRecibido
 import com.tecsup.lavacampus.ui.theme.colorEstado
 import com.tecsup.lavacampus.ui.theme.degradadoElectrico
 import com.tecsup.lavacampus.ui.theme.esModoOscuro
 import com.tecsup.lavacampus.ui.theme.textoSobreDestacado
 import com.tecsup.lavacampus.viewmodel.PanelViewModel
+import java.util.Locale
 
 @Composable
 fun PanelScreen(
@@ -64,6 +68,8 @@ fun PanelScreen(
     val porEstadoBase by vm.porEstado.collectAsState()
     val porServicio by vm.porServicio.collectAsState()
     val atrasados by vm.atrasados.collectAsState()
+    val promedio by vm.promedioCalificacion.collectAsState()
+    val calificados by vm.cantidadCalificados.collectAsState()
     val oscuro = esModoOscuro()
     val porEstado = porEstadoBase.map { d ->
         EstadoPedido.entries.find { it.etiqueta == d.etiqueta }
@@ -94,6 +100,38 @@ fun PanelScreen(
                 color = EstadoCancelado,
                 onClick = onVerPedidos
             )
+        }
+
+        Seccion(Icons.Default.Star, "Calificación de los clientes") {
+            if (calificados == 0) {
+                Text(
+                    "Aún no hay pedidos calificados",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(String.format(Locale.US, "%.1f", promedio), style = MaterialTheme.typography.headlineMedium)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Row {
+                            (1..5).forEach { n ->
+                                Icon(
+                                    if (n <= promedio + 0.5) Icons.Default.Star else Icons.Outlined.StarOutline,
+                                    contentDescription = null,
+                                    tint = EstadoRecibido,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            if (calificados == 1) "1 pedido calificado" else "$calificados pedidos calificados",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
 
         Seccion(Icons.Default.DonutLarge, "Pedidos por estado") {

@@ -64,4 +64,13 @@ interface PedidoDao {
         """
     )
     fun observarGastoMensual(usuarioId: Int): Flow<List<GastoMensual>>
+
+    @Query("UPDATE pedidos SET calificacion = :estrellas WHERE id = :id")
+    suspend fun calificar(id: Int, estrellas: Int)
+
+    @Query("SELECT AVG(calificacion) FROM pedidos WHERE calificacion > 0")
+    fun observarPromedioCalificacion(): Flow<Double?>
+
+    @Query("SELECT COUNT(*) FROM pedidos WHERE calificacion > 0")
+    fun contarCalificados(): Flow<Int>
 }

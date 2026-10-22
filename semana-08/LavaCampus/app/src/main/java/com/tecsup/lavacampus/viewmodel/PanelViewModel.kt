@@ -32,6 +32,13 @@ class PanelViewModel(repo: LavaRepository) : ViewModel() {
     val ingresosSemana: StateFlow<Double> = repo.observarIngresosDesde(lunes)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
+    val promedioCalificacion: StateFlow<Double> = repo.observarPromedioCalificacion()
+        .map { it ?: 0.0 }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    val cantidadCalificados: StateFlow<Int> = repo.observarCantidadCalificados()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     val atrasados: StateFlow<Int> = repo.observarPedidosAtrasados(hoy)
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)

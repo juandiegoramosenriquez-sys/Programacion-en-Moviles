@@ -9,14 +9,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -44,6 +50,7 @@ import com.tecsup.lavacampus.viewmodel.DetallePedidoViewModel
 fun DetallePedidoScreen(vm: DetallePedidoViewModel, modifier: Modifier = Modifier) {
     val detalle by vm.pedido.collectAsState()
     val puedeCancelar by vm.puedeCancelar.collectAsState()
+    val puedeCalificar by vm.puedeCalificar.collectAsState()
     var confirmar by remember { mutableStateOf(false) }
 
     val actual = detalle ?: return
@@ -121,6 +128,33 @@ fun DetallePedidoScreen(vm: DetallePedidoViewModel, modifier: Modifier = Modifie
             EstadoPedido.LISTO -> Aviso("Recógelo en el casillero ${pedido.casillero.orEmpty()}", EstadoListo)
             EstadoPedido.RECIBIDO, EstadoPedido.EN_PROCESO -> Aviso("Casillero: se asignará al estar listo", MaterialTheme.colorScheme.onSurfaceVariant)
             else -> Unit
+        }
+
+        if (puedeCalificar) {
+            Tarjeta {
+                Text(
+                    if (pedido.calificacion == 0) "¿Qué tal tu pedido?" else "Tu calificación",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    "Toca las estrellas para calificar de 1 a 5",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(8.dp))
+                Row {
+                    (1..5).forEach { n ->
+                        IconButton(onClick = { vm.calificar(n) }) {
+                            Icon(
+                                if (n <= pedido.calificacion) Icons.Filled.Star else Icons.Outlined.StarOutline,
+                                contentDescription = "$n estrellas",
+                                tint = if (n <= pedido.calificacion) EstadoRecibido else MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
 
         if (estado != EstadoPedido.CANCELADO && estado != EstadoPedido.ENTREGADO) {
