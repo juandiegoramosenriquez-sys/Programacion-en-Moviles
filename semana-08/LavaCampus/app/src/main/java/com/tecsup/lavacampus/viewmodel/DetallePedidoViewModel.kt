@@ -23,10 +23,21 @@ class DetallePedidoViewModel(
         .map { it?.pedido?.estado == EstadoPedido.RECIBIDO.name }
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val puedeCalificar: StateFlow<Boolean> = pedido
+        .map { it?.pedido?.estado == EstadoPedido.ENTREGADO.name }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
     fun cancelar() {
         if (!puedeCancelar.value) return
         viewModelScope.launch {
             repo.cambiarEstado(pedidoId, EstadoPedido.CANCELADO, null)
+        }
+    }
+
+    fun calificar(estrellas: Int) {
+        if (!puedeCalificar.value || estrellas !in 1..5) return
+        viewModelScope.launch {
+            repo.calificarPedido(pedidoId, estrellas)
         }
     }
 }

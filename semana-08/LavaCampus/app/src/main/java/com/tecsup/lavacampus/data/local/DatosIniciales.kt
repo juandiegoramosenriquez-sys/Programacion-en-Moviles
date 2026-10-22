@@ -36,8 +36,8 @@ object DatosIniciales {
         val marta = db.usuarioDao().login("marta@correo.test", "1234")!!.id
 
         pedido(db, ana, 6, EstadoPedido.CANCELADO, listOf(lavado to 1.0))
-        pedido(db, marta, 4, EstadoPedido.ENTREGADO, listOf(lavado to 1.5, planchado to 2.0), pagado = true)
-        pedido(db, luis, 3, EstadoPedido.ENTREGADO, listOf(lavado to 2.5, seco to 2.0), pagado = true)
+        pedido(db, marta, 4, EstadoPedido.ENTREGADO, listOf(lavado to 1.5, planchado to 2.0), pagado = true, calificacion = 4)
+        pedido(db, luis, 3, EstadoPedido.ENTREGADO, listOf(lavado to 2.5, seco to 2.0), pagado = true, calificacion = 5)
         pedido(db, marta, 2, EstadoPedido.EN_PROCESO, listOf(lavado to 5.0))
         pedido(db, ana, 2, EstadoPedido.EN_PROCESO, listOf(lavado to 2.0, planchado to 4.0))
         pedido(db, ana, 1, EstadoPedido.ENTREGADO, listOf(planchado to 6.0), pagado = true)
@@ -57,7 +57,8 @@ object DatosIniciales {
         estado: EstadoPedido,
         lineas: List<Pair<Servicio, Double>>,
         casillero: String? = null,
-        pagado: Boolean = false
+        pagado: Boolean = false,
+        calificacion: Int = 0
     ) {
         val registro = LocalDate.now().minusDays(haceDias)
         val dias = lineas.maxOf { it.first.horasEntrega } / 24
@@ -78,7 +79,8 @@ object DatosIniciales {
                 estado = estado.name,
                 total = detalles.sumOf { it.subtotal },
                 casillero = casillero,
-                pagado = pagado
+                pagado = pagado,
+                calificacion = calificacion
             )
         ).toInt()
         db.detalleDao().insertarTodos(detalles.map { it.copy(pedidoId = pedidoId) })

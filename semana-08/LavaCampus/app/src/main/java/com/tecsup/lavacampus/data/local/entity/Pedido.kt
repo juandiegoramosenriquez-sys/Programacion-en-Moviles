@@ -29,5 +29,6 @@ data class Pedido(
     val casillero: String? = null,
     val pagado: Boolean = false,
     val nota: String = "",
+    val calificacion: Int = 0,
     val fechaCreacion: Long = System.currentTimeMillis()
 )
