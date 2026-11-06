@@ -5,6 +5,8 @@ object Rutas {
     const val LOGIN = "login"
     const val REGISTRO = "registro"
 
+    const val REGISTRO_SOPORTE = "registro_soporte"
+
     const val INICIO = "inicio"
     const val NUEVO_PEDIDO = "nuevo_pedido?repetir={repetir}"
     const val DETALLE_PEDIDO = "detalle_pedido/{id}"

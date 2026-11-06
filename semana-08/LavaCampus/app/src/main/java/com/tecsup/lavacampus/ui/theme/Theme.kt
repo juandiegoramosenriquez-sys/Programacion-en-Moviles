@@ -120,6 +120,60 @@ private val AdminOscuro = darkColorScheme(
     error = CanceladoNeon
 )
 
+private val SoporteClaro = lightColorScheme(
+    primary = Azul,
+    onPrimary = Color.White,
+    primaryContainer = AzulContenedor,
+    onPrimaryContainer = AzulOscuro,
+    secondary = Color(0xFF1A75FF),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFA8C9FF),
+    onSecondaryContainer = AzulOscuro,
+    tertiary = AzulElectrico,
+    onTertiary = Color.White,
+    background = AzulFondo,
+    onBackground = Tinta,
+    surface = Color.White,
+    onSurface = Tinta,
+    surfaceVariant = AzulSuave,
+    onSurfaceVariant = TintaSuave,
+    outline = Borde,
+    outlineVariant = Color(0xFFA9C9F7),
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = AzulFondo,
+    surfaceContainer = Color.White,
+    surfaceContainerHigh = AzulSuave,
+    surfaceContainerHighest = AzulContenedor,
+    error = CanceladoClaro
+)
+
+private val SoporteOscuro = darkColorScheme(
+    primary = NocheAzulAcento,
+    onPrimary = NocheAzulSobreAcento,
+    primaryContainer = NocheAzulContenedor,
+    onPrimaryContainer = NocheAzulSobreContenedor,
+    secondary = NocheAzulAcento,
+    onSecondary = NocheAzulSobreAcento,
+    secondaryContainer = NocheAzulContenedor,
+    onSecondaryContainer = NocheAzulSobreContenedor,
+    tertiary = NocheAzulAcento,
+    onTertiary = NocheAzulSobreAcento,
+    background = NocheAzulFondo,
+    onBackground = NocheAzulTexto,
+    surface = NocheAzulTarjeta,
+    onSurface = NocheAzulTexto,
+    surfaceVariant = NocheAzulTarjeta,
+    onSurfaceVariant = NocheAzulTextoSuave,
+    outline = NocheAzulApagado,
+    outlineVariant = NocheAzulBorde,
+    surfaceContainerLowest = NocheAzulFondo,
+    surfaceContainerLow = NocheAzulFondo,
+    surfaceContainer = NocheAzulFondo,
+    surfaceContainerHigh = NocheAzulTarjeta,
+    surfaceContainerHighest = NocheAzulBorde,
+    error = CanceladoNeon
+)
+
 private val Formas = Shapes(
     extraSmall = RoundedCornerShape(8.dp),
     small = RoundedCornerShape(12.dp),
@@ -153,7 +207,9 @@ fun LavaTheme(
 ) {
     val colores = when (rol) {
         Rol.CLIENTE -> if (oscuro) EstudianteOscuro else EstudianteClaro
+        //Rol.ADMIN -> if (oscuro) AdminOscuro else AdminClaro
         Rol.ADMIN -> if (oscuro) AdminOscuro else AdminClaro
+        Rol.SOPORTE -> if (oscuro) SoporteOscuro else SoporteClaro
     }
     MaterialTheme(
         colorScheme = colores,

@@ -1,3 +1,3 @@
 package com.tecsup.lavacampus.model
 
-enum class Rol { CLIENTE, ADMIN }
+enum class Rol { CLIENTE, ADMIN, SOPORTE }

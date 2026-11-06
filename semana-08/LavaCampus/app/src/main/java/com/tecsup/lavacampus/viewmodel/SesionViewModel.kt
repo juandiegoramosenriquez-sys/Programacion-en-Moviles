@@ -59,7 +59,8 @@ class SesionViewModel(
 
     fun cambiarPerfil() {
         val actual = _usuarioActual.value ?: return
-        _rolLogin.value = if (actual.rol == Rol.ADMIN.name) Rol.CLIENTE else Rol.ADMIN
+        //_rolLogin.value = if (actual.rol == Rol.ADMIN.name) Rol.CLIENTE else Rol.ADMIN
+        _rolLogin.value = if (actual.rol == Rol.CLIENTE.name) Rol.ADMIN else Rol.CLIENTE
         _error.value = null
         cerrarSesion()
     }
@@ -73,18 +74,47 @@ class SesionViewModel(
         return usuario
     }
 
-    fun login(correo: String, clave: String, rolSeleccionado: Rol) {
+    //fun login(correo: String, clave: String, rolSeleccionado: Rol) {
+    //    viewModelScope.launch {
+    //        if (correo.isBlank() || clave.isBlank()) {
+    //            _error.value = "Completa el correo y la contraseña"
+    //            return@launch
+    //        }
+    //        val usuario = repo.login(correo.trim(), clave)
+    //        when {
+    //            usuario == null -> _error.value = "Correo o contraseña incorrectos"
+    //            usuario.rol != rolSeleccionado.name -> _error.value =
+    //                if (rolSeleccionado == Rol.ADMIN) "Esta cuenta no es de administrador"
+    //                else "Esta cuenta no es de estudiante"
+    //            else -> {
+    //                prefs.guardarSesion(rolSeleccionado, usuario.id)
+    //                _error.value = null
+    //                _usuarioActual.value = usuario
+    //            }
+    //        }
+    //    }
+    //}
+
+
+
+    fun login(correo: String, clave: String, rolSeleccionado: Rol, confirmar: String) {
         viewModelScope.launch {
             if (correo.isBlank() || clave.isBlank()) {
                 _error.value = "Completa el correo y la contraseña"
                 return@launch
             }
+            if (rolSeleccionado == Rol.SOPORTE && clave != confirmar) {
+                _error.value = "Las contraseñas no coinciden"
+                return@launch
+            }
             val usuario = repo.login(correo.trim(), clave)
             when {
                 usuario == null -> _error.value = "Correo o contraseña incorrectos"
-                usuario.rol != rolSeleccionado.name -> _error.value =
-                    if (rolSeleccionado == Rol.ADMIN) "Esta cuenta no es de administrador"
-                    else "Esta cuenta no es de estudiante"
+                usuario.rol != rolSeleccionado.name -> _error.value = when (rolSeleccionado) {
+                    Rol.ADMIN -> "Esta cuenta no es de administrador"
+                    Rol.SOPORTE -> "Esta cuenta no es de soporte"
+                    Rol.CLIENTE -> "Esta cuenta no es de estudiante"
+                }
                 else -> {
                     prefs.guardarSesion(rolSeleccionado, usuario.id)
                     _error.value = null
@@ -123,6 +153,37 @@ class SesionViewModel(
             _usuarioActual.value = nuevo.copy(id = id)
         }
     }
+
+
+
+    fun registrarSoporte(codigo: String, nombre: String, apellido: String, correo: String, clave: String) {
+        viewModelScope.launch {
+            val codigoLimpio = codigo.trim()
+            val correoLimpio = correo.trim().lowercase()
+            _errorRegistro.value = when {
+                codigoLimpio.isBlank() || nombre.isBlank() || apellido.isBlank() || correo.isBlank() || clave.isBlank() ->
+                    "Completa todos los campos"
+                !Regex("""^[^@\s]+@[^@\s]+\.[^@\s]+$""").matches(correoLimpio) -> "Escribe un correo válido"
+                clave.length < 4 -> "La contraseña debe tener al menos 4 caracteres"
+                repo.existeCodigo(codigoLimpio) -> "Ese código ya está registrado"
+                repo.existeCorreo(correoLimpio) -> "Ese correo ya está registrado"
+                else -> null
+            }
+            if (_errorRegistro.value != null) return@launch
+            val nuevo = Usuario(
+                nombre = nombre.trim(),
+                apellido = apellido.trim(),
+                codigo = codigoLimpio,
+                correo = correoLimpio,
+                clave = clave,
+                rol = Rol.SOPORTE.name
+            )
+            val id = repo.registrarUsuario(nuevo).toInt()
+            prefs.guardarSesion(Rol.SOPORTE, id)
+            _usuarioActual.value = nuevo.copy(id = id)
+        }
+    }
+
 
     private suspend fun generarCodigo(): String {
         val anio = LocalDate.now().year

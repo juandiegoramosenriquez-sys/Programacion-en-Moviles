@@ -15,7 +15,7 @@ import com.tecsup.lavacampus.data.local.entity.Usuario
 
 @Database(
     entities = [Servicio::class, Usuario::class, Pedido::class, DetallePedido::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class LavaDatabase : RoomDatabase() {

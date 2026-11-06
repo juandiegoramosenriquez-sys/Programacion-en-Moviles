@@ -67,6 +67,7 @@ import com.tecsup.lavacampus.viewmodel.PanelViewModel
 import com.tecsup.lavacampus.viewmodel.ServiciosViewModel
 import com.tecsup.lavacampus.viewmodel.SesionViewModel
 import kotlinx.coroutines.launch
+import com.tecsup.lavacampus.ui.estudiante.RegistroSoporteScreen
 
 private data class ItemBarra(val ruta: String, val texto: String, val icono: ImageVector)
 
@@ -91,6 +92,8 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
     val scope = rememberCoroutineScope()
     val sesion: SesionViewModel = viewModel(factory = LavaViewModelFactory { SesionViewModel(repo, prefs) })
     val oscuro by sesion.modoOscuro.collectAsState()
+    val usuarioSesion by sesion.usuarioActual.collectAsState()
+    val rolGestion = if (usuarioSesion?.rol == Rol.SOPORTE.name) Rol.SOPORTE else Rol.ADMIN
 
     val cerrarSesion: () -> Unit = {
         sesion.cerrarSesion()
@@ -127,7 +130,8 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                         popUpTo(Rutas.LOGIN) { inclusive = true }
                     }
                 },
-                onRegistrarse = { nav.navigate(Rutas.REGISTRO) }
+                onRegistrarse = { nav.navigate(Rutas.REGISTRO) },
+                onRegistrarSoporte = { nav.navigate(Rutas.REGISTRO_SOPORTE) }
             )
         }
 
@@ -144,6 +148,24 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
                 )
             }
         }
+
+
+
+        composable(Rutas.REGISTRO_SOPORTE) {
+            Pantalla(nav, Rol.SOPORTE, oscuro, "Registrar soporte", conBarra = false) { modifier ->
+                RegistroSoporteScreen(
+                    vm = sesion,
+                    onRegistrado = {
+                        nav.navigate(Rutas.PANEL) {
+                            popUpTo(nav.graph.id) { inclusive = true }
+                        }
+                    },
+                    modifier = modifier
+                )
+            }
+        }
+
+
 
         composable(Rutas.INICIO) {
             val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
@@ -251,7 +273,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
 
         composable(Rutas.PANEL) {
             val vm: PanelViewModel = viewModel(factory = LavaViewModelFactory { PanelViewModel(repo) })
-            Pantalla(nav, Rol.ADMIN, oscuro, "Panel", conBarra = true) { modifier ->
+            Pantalla(nav, rolGestion, oscuro, "Panel", conBarra = true) { modifier ->
                 PanelScreen(
                     vm = vm,
                     onVerPedidos = { irPestana(nav, Rutas.BANDEJA, Rutas.PANEL) },
@@ -262,7 +284,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
 
         composable(Rutas.BANDEJA) {
             val vm: BandejaViewModel = viewModel(factory = LavaViewModelFactory { BandejaViewModel(repo) })
-            Pantalla(nav, Rol.ADMIN, oscuro, "Pedidos", conBarra = true) { modifier ->
+            Pantalla(nav, rolGestion, oscuro, "Pedidos", conBarra = true) { modifier ->
                 BandejaScreen(
                     vm = vm,
                     onAbrir = { nav.navigate(Rutas.gestionPedido(it)) },
@@ -277,7 +299,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
         ) { entrada ->
             val id = entrada.arguments?.getInt("id") ?: 0
             val vm: GestionPedidoViewModel = viewModel(factory = LavaViewModelFactory { GestionPedidoViewModel(repo, id) })
-            Pantalla(nav, Rol.ADMIN, oscuro, "Gestionar pedido", conBarra = false) { modifier ->
+            Pantalla(nav, rolGestion, oscuro, "Gestionar pedido", conBarra = false) { modifier ->
                 GestionPedidoScreen(vm = vm, modifier = modifier)
             }
         }
@@ -285,7 +307,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
         composable(Rutas.SERVICIOS) {
             val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
             Pantalla(
-                nav, Rol.ADMIN, oscuro, "Servicios", conBarra = true,
+                nav, rolGestion, oscuro, "Servicios", conBarra = true,
                 botonFlotante = {
                     FloatingActionButton(
                         onClick = { nav.navigate(Rutas.formularioServicio(0)) },
@@ -311,7 +333,7 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
             val id = entrada.arguments?.getInt("id") ?: 0
             val vm: ServiciosViewModel = viewModel(factory = LavaViewModelFactory { ServiciosViewModel(repo) })
             val titulo = if (id == 0) "Nuevo servicio" else "Editar servicio"
-            Pantalla(nav, Rol.ADMIN, oscuro, titulo, conBarra = false) { modifier ->
+            Pantalla(nav, rolGestion, oscuro, titulo, conBarra = false) { modifier ->
                 FormularioServicioScreen(
                     vm = vm,
                     servicioId = id,
@@ -323,14 +345,14 @@ fun NavLava(repo: LavaRepository, prefs: PreferenciasStore) {
 
         composable(Rutas.CLIENTES) {
             val vm: ClientesViewModel = viewModel(factory = LavaViewModelFactory { ClientesViewModel(repo) })
-            Pantalla(nav, Rol.ADMIN, oscuro, "Clientes", conBarra = true) { modifier ->
+            Pantalla(nav, rolGestion, oscuro, "Clientes", conBarra = true) { modifier ->
                 ClientesScreen(vm = vm, modifier = modifier)
             }
         }
 
         composable(Rutas.AJUSTES) {
             val usuario = sesion.usuarioActual.collectAsState().value ?: return@composable
-            Pantalla(nav, Rol.ADMIN, oscuro, "Ajustes", conBarra = true) { modifier ->
+            Pantalla(nav, rolGestion, oscuro, "Ajustes", conBarra = true) { modifier ->
                 AjustesScreen(
                     usuario = usuario,
                     sesion = sesion,
@@ -368,8 +390,8 @@ private fun Pantalla(
 @Composable
 private fun BarraInferior(nav: NavHostController, rol: Rol) {
     val ruta = nav.currentBackStackEntryAsState().value?.destination?.route
-    val items = if (rol == Rol.ADMIN) itemsAdmin else itemsEstudiante
-    val raiz = if (rol == Rol.ADMIN) Rutas.PANEL else Rutas.INICIO
+    val items = if (rol == Rol.CLIENTE) itemsEstudiante else itemsAdmin
+    val raiz = if (rol == Rol.CLIENTE) Rutas.INICIO else Rutas.PANEL
     NavigationBar {
         items.forEach { item ->
             NavigationBarItem(
@@ -394,4 +416,4 @@ private fun irPestana(nav: NavHostController, ruta: String, raiz: String) {
 }
 
 private fun principalDe(rol: String): String =
-    if (rol == Rol.ADMIN.name) Rutas.PANEL else Rutas.INICIO
+    if (rol == Rol.CLIENTE.name) Rutas.INICIO else Rutas.PANEL

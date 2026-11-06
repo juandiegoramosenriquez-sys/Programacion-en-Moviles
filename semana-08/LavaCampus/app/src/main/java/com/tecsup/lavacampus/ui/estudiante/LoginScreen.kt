@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -37,7 +39,12 @@ import com.tecsup.lavacampus.viewmodel.SesionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit, onRegistrarse: () -> Unit) {
+fun LoginScreen(
+    vm: SesionViewModel,
+    onIngresar: (Usuario) -> Unit,
+    onRegistrarse: () -> Unit,
+    onRegistrarSoporte: () -> Unit
+) {
     val usuario by vm.usuarioActual.collectAsState()
     val mensaje by vm.error.collectAsState()
     val oscuro by vm.modoOscuro.collectAsState()
@@ -45,12 +52,13 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit, onRegistrars
     var rol by rememberSaveable { mutableStateOf(vm.rolLogin.value) }
     var correo by rememberSaveable { mutableStateOf("") }
     var clave by rememberSaveable { mutableStateOf("") }
+    var confirmar by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(usuario) {
         usuario?.let(onIngresar)
     }
 
-    val opciones = listOf(Rol.CLIENTE to "Estudiante", Rol.ADMIN to "Administrador")
+    val opciones = listOf(Rol.CLIENTE to "Estudiante", Rol.ADMIN to "Admin", Rol.SOPORTE to "Soporte")
 
     LavaTheme(rol = rol, oscuro = oscuro) {
         Scaffold { padding ->
@@ -58,6 +66,7 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit, onRegistrars
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding)
+                    .verticalScroll(rememberScrollState())
                     .padding(24.dp),
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -94,6 +103,11 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit, onRegistrars
                 Spacer(Modifier.height(12.dp))
                 LavaTextField(clave, { clave = it }, "Contraseña", esClave = true)
 
+                if (rol == Rol.SOPORTE) {
+                    Spacer(Modifier.height(12.dp))
+                    LavaTextField(confirmar, { confirmar = it }, "Confirmar contraseña", esClave = true)
+                }
+
                 Box(
                     contentAlignment = Alignment.CenterStart,
                     modifier = Modifier.fillMaxWidth().height(48.dp)
@@ -103,7 +117,7 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit, onRegistrars
                     }
                 }
 
-                LavaButton("Ingresar", onClick = { vm.login(correo, clave, rol) })
+                LavaButton("Ingresar", onClick = { vm.login(correo, clave, rol, confirmar) })
 
                 Box(
                     contentAlignment = Alignment.Center,
@@ -115,6 +129,14 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Usuario) -> Unit, onRegistrars
                             onRegistrarse()
                         }) {
                             Text("¿No tienes cuenta? Regístrate")
+                        }
+                    }
+                    if (rol == Rol.SOPORTE) {
+                        TextButton(onClick = {
+                            vm.limpiarError()
+                            onRegistrarSoporte()
+                        }) {
+                            Text("Registrar soporte")
                         }
                     }
                 }
