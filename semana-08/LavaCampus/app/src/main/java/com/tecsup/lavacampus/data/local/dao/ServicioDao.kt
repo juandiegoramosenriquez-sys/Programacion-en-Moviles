@@ -23,6 +23,9 @@ interface ServicioDao {
     @Query("SELECT COUNT(*) FROM servicios")
     suspend fun contar(): Int
 
+    @Query("SELECT COUNT(*) FROM servicios WHERE nombre = :nombre")
+    suspend fun contarPorNombre(nombre: String): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(s: Servicio): Long
 

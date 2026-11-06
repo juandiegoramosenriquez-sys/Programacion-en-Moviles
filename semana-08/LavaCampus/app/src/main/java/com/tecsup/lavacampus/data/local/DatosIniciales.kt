@@ -12,6 +12,11 @@ import java.time.LocalDate
 object DatosIniciales {
 
     suspend fun sembrar(db: LavaDatabase) {
+        if (db.servicioDao().contarPorNombre("Otros") == 0) {
+            guardar(db, Servicio(nombre = "Otros", descripcion = "Otros servicios de lavandería",
+                unidad = Unidad.UNIDAD.name, precio = 10.00, horasEntrega = 48, icono = "wash"))
+        }
+
         if (db.usuarioDao().contar() > 0) return
 
         val lavado = guardar(db, Servicio(nombre = "Lavado y secado", descripcion = "Lavado, secado y doblado de tu ropa",
@@ -22,6 +27,9 @@ object DatosIniciales {
             unidad = Unidad.PRENDA.name, precio = 12.00, horasEntrega = 48, icono = "shirt"))
         guardar(db, Servicio(nombre = "Edredón / frazada", descripcion = "Lavado de edredones y frazadas",
             unidad = Unidad.UNIDAD.name, precio = 20.00, horasEntrega = 48, activo = false, icono = "wash"))
+
+        guardar(db, Servicio(nombre = "Desmanchado", descripcion = "Eliminación de manchas difíciles en tus prendas",
+            unidad = Unidad.PRENDA.name, precio = 5.00, horasEntrega = 48, icono = "shirt"))
 
         db.usuarioDao().insertarTodos(
             listOf(
