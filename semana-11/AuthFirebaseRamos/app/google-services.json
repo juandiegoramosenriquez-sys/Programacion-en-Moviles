@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "307907202848",
+    "project_id": "authfirebaseramos",
+    "storage_bucket": "authfirebaseramos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307907202848:android:e2d1d4f1abbd559563d145",
+        "android_client_info": {
+          "package_name": "com.tecsup.authfirebaseramos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXulo5mJvWcwvavpaT4dfJ71WnWy1SboY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
