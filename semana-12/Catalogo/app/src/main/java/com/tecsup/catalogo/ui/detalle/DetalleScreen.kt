@@ -28,6 +28,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.tecsup.catalogo.domain.model.Item
 import com.tecsup.catalogo.ui.UiState
+import com.tecsup.catalogo.ui.components.BotonFavorito
 import com.tecsup.catalogo.ui.components.Cargando
 import com.tecsup.catalogo.ui.components.ErrorView
 
@@ -56,13 +57,17 @@ fun DetalleScreen(viewModel: DetalleViewModel, onVolver: () -> Unit) {
                 onReintentar = viewModel::cargar,
                 modifier = modifier
             )
-            is UiState.Exito -> DetalleContenido(e.datos, modifier)
+            is UiState.Exito -> DetalleContenido(
+                item = e.datos,
+                onFavorito = viewModel::alternarFavorito,
+                modifier = modifier
+            )
         }
     }
 }
 
 @Composable
-fun DetalleContenido(item: Item, modifier: Modifier = Modifier) {
+fun DetalleContenido(item: Item, onFavorito: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -78,11 +83,15 @@ fun DetalleContenido(item: Item, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(250.dp)
         )
-        Text(
-            text = item.titulo,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = item.titulo,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            BotonFavorito(esFavorito = item.esFavorito, onClick = onFavorito)
+        }
         Text(
             text = item.subtitulo,
             style = MaterialTheme.typography.titleMedium

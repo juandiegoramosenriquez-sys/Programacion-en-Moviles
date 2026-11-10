@@ -18,6 +18,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,16 +31,28 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.tecsup.catalogo.domain.model.Item
 import com.tecsup.catalogo.ui.UiState
+import com.tecsup.catalogo.ui.components.BotonFavorito
 import com.tecsup.catalogo.ui.components.Cargando
 import com.tecsup.catalogo.ui.components.ErrorView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListaScreen(viewModel: ListaViewModel, onItemClick: (Int) -> Unit) {
+fun ListaScreen(
+    viewModel: ListaViewModel,
+    onItemClick: (Int) -> Unit,
+    onVerFavoritos: () -> Unit
+) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Smartphones") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Smartphones") },
+                actions = {
+                    TextButton(onClick = onVerFavoritos) { Text("♥ Favoritos") }
+                }
+            )
+        }
     ) { padding ->
         val modifier = Modifier.padding(padding)
         when (val e = estado) {
@@ -61,7 +74,11 @@ fun ListaScreen(viewModel: ListaViewModel, onItemClick: (Int) -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(e.datos, key = { it.id }) { item ->
-                            ItemFila(item = item, onClick = { onItemClick(item.id) })
+                            ItemFila(
+                                item = item,
+                                onClick = { onItemClick(item.id) },
+                                onFavorito = { viewModel.alternarFavorito(item.id) }
+                            )
                         }
                     }
                 }
@@ -71,7 +88,7 @@ fun ListaScreen(viewModel: ListaViewModel, onItemClick: (Int) -> Unit) {
 }
 
 @Composable
-fun ItemFila(item: Item, onClick: () -> Unit) {
+fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
     Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -84,7 +101,7 @@ fun ItemFila(item: Item, onClick: () -> Unit) {
                 modifier = Modifier.size(64.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.titulo,
                     style = MaterialTheme.typography.titleMedium,
@@ -95,6 +112,7 @@ fun ItemFila(item: Item, onClick: () -> Unit) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            BotonFavorito(esFavorito = item.esFavorito, onClick = onFavorito)
         }
     }
 }

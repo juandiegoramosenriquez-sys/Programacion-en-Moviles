@@ -37,6 +37,16 @@ class DetalleViewModel(
         }
     }
 
+    fun alternarFavorito() {
+        val actual = _estado.value
+        if (actual is UiState.Exito) {
+            viewModelScope.launch {
+                repo.alternarFavorito(id)
+                _estado.value = UiState.Exito(actual.datos.copy(esFavorito = !actual.datos.esFavorito))
+            }
+        }
+    }
+
     private fun mensajeDe(e: Throwable) = when (e) {
         is IOException -> "No hay conexión a internet"
         is HttpException -> "El servidor respondió con error ${e.code()}"
