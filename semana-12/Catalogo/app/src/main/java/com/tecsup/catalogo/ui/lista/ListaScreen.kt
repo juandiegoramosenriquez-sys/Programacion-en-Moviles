@@ -42,7 +42,9 @@ fun ListaScreen(
     viewModel: ListaViewModel,
     onItemClick: (Int) -> Unit,
     onVerFavoritos: () -> Unit,
-    onCerrarSesion: () -> Unit
+    onCerrarSesion: () -> Unit,
+    esAdmin: Boolean,
+    onAbrirAdmin: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val aviso by viewModel.aviso.collectAsStateWithLifecycle()
@@ -53,6 +55,9 @@ fun ListaScreen(
                 title = { Text("Smartphones") },
                 actions = {
                     TextButton(onClick = onVerFavoritos) { Text("♥ Favoritos") }
+                    if (esAdmin) {
+                        TextButton(onClick = onAbrirAdmin) { Text("Admin") }
+                    }
                     TextButton(onClick = onCerrarSesion) { Text("Salir") }
                 }
             )

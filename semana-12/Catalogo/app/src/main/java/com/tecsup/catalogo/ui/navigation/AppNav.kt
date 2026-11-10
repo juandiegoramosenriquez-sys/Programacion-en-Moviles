@@ -1,6 +1,8 @@
 package com.tecsup.catalogo.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -8,6 +10,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.catalogo.AppContainer
+import com.tecsup.catalogo.domain.model.Rol
+import com.tecsup.catalogo.domain.model.Sesion
+import com.tecsup.catalogo.ui.UiState
+import com.tecsup.catalogo.ui.admin.AdminScreen
+import com.tecsup.catalogo.ui.admin.AdminViewModel
 import com.tecsup.catalogo.ui.detalle.DetalleScreen
 import com.tecsup.catalogo.ui.detalle.DetalleViewModel
 import com.tecsup.catalogo.ui.favoritos.FavoritosScreen
@@ -21,6 +28,8 @@ import com.tecsup.catalogo.ui.lista.ListaViewModel
 fun AppNav(container: AppContainer) {
     val navController = rememberNavController()
     val loginViewModel: LoginViewModel = viewModel(factory = LoginViewModel.factory(container))
+    val estadoLogin by loginViewModel.estado.collectAsStateWithLifecycle()
+    val esAdmin = (estadoLogin as? UiState.Exito<Sesion?>)?.datos?.rol == Rol.ADMIN
 
     NavHost(navController = navController, startDestination = "login") {
 
@@ -46,8 +55,20 @@ fun AppNav(container: AppContainer) {
                     navController.navigate("login") {
                         popUpTo(navController.graph.id) { inclusive = true }
                     }
-                }
+                },
+                esAdmin = esAdmin,
+                onAbrirAdmin = { navController.navigate("admin") }
             )
+        }
+
+        composable("admin") {
+            if (esAdmin) {
+                val vm: AdminViewModel = viewModel(factory = AdminViewModel.factory(container))
+                AdminScreen(
+                    viewModel = vm,
+                    onVolver = { navController.popBackStack() }
+                )
+            }
         }
 
         composable("favoritos") {
