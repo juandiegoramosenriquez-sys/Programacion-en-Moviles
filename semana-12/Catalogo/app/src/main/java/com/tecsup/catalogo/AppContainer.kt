@@ -1,6 +1,8 @@
 package com.tecsup.catalogo
 
 import android.content.Context
+import com.tecsup.catalogo.data.auth.AuthRepository
+import com.tecsup.catalogo.data.auth.FirebaseAuthRepository
 import com.tecsup.catalogo.data.local.AppDatabase
 import com.tecsup.catalogo.data.remote.RetrofitClient
 import com.tecsup.catalogo.data.repository.ItemRepository
@@ -12,5 +14,9 @@ class AppContainer(context: Context) {
 
     val itemRepository: ItemRepository by lazy {
         ItemRepositoryImpl(RetrofitClient.api, baseDeDatos.itemDao())
+    }
+
+    val authRepository: AuthRepository by lazy {
+        FirebaseAuthRepository()
     }
 }

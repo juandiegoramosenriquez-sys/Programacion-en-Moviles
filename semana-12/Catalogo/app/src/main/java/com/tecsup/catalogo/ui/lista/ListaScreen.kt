@@ -41,7 +41,8 @@ import com.tecsup.catalogo.ui.components.ErrorView
 fun ListaScreen(
     viewModel: ListaViewModel,
     onItemClick: (Int) -> Unit,
-    onVerFavoritos: () -> Unit
+    onVerFavoritos: () -> Unit,
+    onCerrarSesion: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val aviso by viewModel.aviso.collectAsStateWithLifecycle()
@@ -52,6 +53,7 @@ fun ListaScreen(
                 title = { Text("Smartphones") },
                 actions = {
                     TextButton(onClick = onVerFavoritos) { Text("♥ Favoritos") }
+                    TextButton(onClick = onCerrarSesion) { Text("Salir") }
                 }
             )
         }
