@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -19,10 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.tecsup.catalogo.domain.model.Item
 import com.tecsup.catalogo.ui.UiState
 import com.tecsup.catalogo.ui.components.Cargando
@@ -30,7 +35,7 @@ import com.tecsup.catalogo.ui.components.ErrorView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListaScreen(viewModel: ListaViewModel = viewModel()) {
+fun ListaScreen(viewModel: ListaViewModel) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -41,7 +46,7 @@ fun ListaScreen(viewModel: ListaViewModel = viewModel()) {
             is UiState.Cargando -> Cargando(modifier)
             is UiState.Error -> ErrorView(
                 mensaje = e.mensaje,
-                onReintentar = viewModel::cargar,
+                onReintentar = viewModel::refrescar,
                 modifier = modifier
             )
             is UiState.Exito -> {
@@ -68,16 +73,28 @@ fun ListaScreen(viewModel: ListaViewModel = viewModel()) {
 @Composable
 fun ItemFila(item: Item) {
     Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = item.titulo,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AsyncImage(
+                model = item.imagenUrl,
+                contentDescription = item.titulo,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.size(64.dp)
             )
-            Text(
-                text = item.subtitulo,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = item.titulo,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = item.subtitulo,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }

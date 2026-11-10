@@ -1,42 +1,63 @@
 package com.tecsup.catalogo.ui.lista
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.tecsup.catalogo.AppContainer
+import com.tecsup.catalogo.data.repository.ItemRepository
 import com.tecsup.catalogo.domain.model.Item
 import com.tecsup.catalogo.ui.UiState
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
-class ListaViewModel : ViewModel() {
+class ListaViewModel(
+    private val repo: ItemRepository
+) : ViewModel() {
 
     private val _estado = MutableStateFlow<UiState<List<Item>>>(UiState.Cargando)
     val estado: StateFlow<UiState<List<Item>>> = _estado.asStateFlow()
 
-    private val productosDePrueba = listOf(
-        Item(121, "iPhone 5s", "Apple · $199.99", null),
-        Item(122, "iPhone 6", "Apple · $299.99", null),
-        Item(123, "iPhone 13 Pro", "Apple · $1099.99", null),
-        Item(124, "iPhone X", "Apple · $899.99", null),
-        Item(125, "Oppo A57", "Oppo · $249.99", null),
-        Item(126, "Oppo F19 Pro Plus", "Oppo · $399.99", null),
-        Item(127, "Realme C35", "Realme · $149.99", null),
-        Item(128, "Samsung Galaxy S8", "Samsung · $499.99", null),
-        Item(129, "Samsung Galaxy S10", "Samsung · $699.99", null),
-        Item(130, "Vivo X21", "Vivo · $499.99", null)
-    )
+    private var refrescoTerminado = false
 
     init {
-        cargar()
+        viewModelScope.launch {
+            repo.items.collect { lista ->
+                if (lista.isNotEmpty() || refrescoTerminado) _estado.value = UiState.Exito(lista)
+            }
+        }
+        refrescar()
     }
 
-    fun cargar() {
+    fun refrescar() {
         viewModelScope.launch {
-            _estado.value = UiState.Cargando
-            delay(1000)
-            _estado.value = UiState.Exito(productosDePrueba)
+            if (repo.cantidadGuardada() == 0) _estado.value = UiState.Cargando
+            val resultado = repo.refrescar()
+            refrescoTerminado = true
+            resultado
+                .onSuccess {
+                    if (_estado.value is UiState.Cargando) _estado.value = UiState.Exito(emptyList())
+                }
+                .onFailure { e ->
+                    _estado.value = UiState.Error(mensajeDe(e))
+                }
+        }
+    }
+
+    private fun mensajeDe(e: Throwable) = when (e) {
+        is IOException -> "No hay conexión a internet"
+        is HttpException -> "El servidor respondió con error ${e.code()}"
+        else -> "Ocurrió un error inesperado"
+    }
+
+    companion object {
+        fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
+            initializer { ListaViewModel(container.itemRepository) }
         }
     }
 }
