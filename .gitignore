@@ -10,5 +10,8 @@ captures/
 .externalNativeBuild/
 .cxx/
 
+# Configuracion de Firebase con la clave de API
+google-services.json
+
 # Temporales de Word
 ~$*
