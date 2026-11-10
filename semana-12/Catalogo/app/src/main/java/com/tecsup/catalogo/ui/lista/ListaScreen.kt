@@ -1,5 +1,6 @@
 package com.tecsup.catalogo.ui.lista
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ fun ListaScreen(
     onVerFavoritos: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
+    val aviso by viewModel.aviso.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -62,14 +64,17 @@ fun ListaScreen(
                 onReintentar = viewModel::refrescar,
                 modifier = modifier
             )
-            is UiState.Exito -> {
+            is UiState.Exito -> Column(modifier = modifier.fillMaxSize()) {
+                aviso?.let { texto ->
+                    AvisoSinConexion(texto = texto, onReintentar = viewModel::refrescar)
+                }
                 if (e.datos.isEmpty()) {
-                    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text("No hay productos")
                     }
                 } else {
                     LazyColumn(
-                        modifier = modifier.fillMaxSize(),
+                        modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -84,6 +89,25 @@ fun ListaScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AvisoSinConexion(texto: String, onReintentar: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.errorContainer)
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = texto,
+            color = MaterialTheme.colorScheme.onErrorContainer,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+        TextButton(onClick = onReintentar) { Text("Reintentar") }
     }
 }
 
