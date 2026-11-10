@@ -5,5 +5,8 @@ data class Item(
     val titulo: String,
     val subtitulo: String,
     val imagenUrl: String?,
-    val esFavorito: Boolean = false
+    val esFavorito: Boolean = false,
+    val descripcion: String = "",
+    val rating: Double = 0.0,
+    val stock: Int = 0
 )

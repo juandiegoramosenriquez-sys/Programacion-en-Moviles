@@ -35,7 +35,7 @@ import com.tecsup.catalogo.ui.components.ErrorView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListaScreen(viewModel: ListaViewModel) {
+fun ListaScreen(viewModel: ListaViewModel, onItemClick: (Int) -> Unit) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 
     Scaffold(
@@ -61,7 +61,7 @@ fun ListaScreen(viewModel: ListaViewModel) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(e.datos, key = { it.id }) { item ->
-                            ItemFila(item)
+                            ItemFila(item = item, onClick = { onItemClick(item.id) })
                         }
                     }
                 }
@@ -71,8 +71,8 @@ fun ListaScreen(viewModel: ListaViewModel) {
 }
 
 @Composable
-fun ItemFila(item: Item) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+fun ItemFila(item: Item, onClick: () -> Unit) {
+    Card(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically

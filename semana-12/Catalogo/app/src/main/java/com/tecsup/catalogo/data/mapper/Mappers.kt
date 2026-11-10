@@ -8,5 +8,8 @@ fun ItemDto.aModelo(esFavorito: Boolean = false): Item = Item(
     titulo = title,
     subtitulo = "${brand ?: "Sin marca"} · \$$price",
     imagenUrl = thumbnail,
-    esFavorito = esFavorito
+    esFavorito = esFavorito,
+    descripcion = description,
+    rating = rating,
+    stock = stock
 )
