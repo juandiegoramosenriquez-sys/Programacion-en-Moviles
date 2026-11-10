@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tecsup.catalogo.AppContainer
 import com.tecsup.catalogo.data.repository.ItemRepository
+import com.tecsup.catalogo.notification.Notificador
 import com.tecsup.catalogo.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 data class Totales(val guardados: Int, val favoritos: Int)
 
 class AdminViewModel(
-    private val repo: ItemRepository
+    private val repo: ItemRepository,
+    private val notificador: Notificador
 ) : ViewModel() {
 
     val estado: StateFlow<UiState<Totales>> = combine(repo.items, repo.favoritos) { items, favoritos ->
@@ -37,7 +39,10 @@ class AdminViewModel(
         viewModelScope.launch {
             _sincronizando.value = true
             repo.refrescar()
-                .onSuccess { n -> _mensaje.value = "Sincronizado: se guardaron $n elementos" }
+                .onSuccess { n ->
+                    _mensaje.value = "Sincronizado: se guardaron $n elementos"
+                    notificador.mostrar("Datos actualizados", "Se guardaron $n elementos")
+                }
                 .onFailure { _mensaje.value = "No se pudo sincronizar. Revisa tu conexión" }
             _sincronizando.value = false
         }
@@ -52,7 +57,7 @@ class AdminViewModel(
 
     companion object {
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
-            initializer { AdminViewModel(container.itemRepository) }
+            initializer { AdminViewModel(container.itemRepository, container.notificador) }
         }
     }
 }
