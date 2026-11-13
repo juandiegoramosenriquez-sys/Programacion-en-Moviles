@@ -9,4 +9,7 @@ data class Item(
     val descripcion: String = "",
     val rating: Double = 0.0,
     val stock: Int = 0
-)
+) {
+    val marca: String get() = subtitulo.substringBefore(" · ")
+    val precio: String get() = subtitulo.substringAfter(" · ", "")
+}

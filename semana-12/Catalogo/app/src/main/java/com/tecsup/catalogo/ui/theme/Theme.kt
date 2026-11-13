@@ -1,43 +1,53 @@
 package com.tecsup.catalogo.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.Shapes
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
-private val CyberpunkDarkColorScheme = darkColorScheme(
-    primary = NeonPrimary,
-    onPrimary = NeonOnPrimary,
-    primaryContainer = Color(0xFF2A1B4E),
-    onPrimaryContainer = Color(0xFFE2D9F3),
-    secondary = NeonSecondary,
-    onSecondary = Color(0xFF003730),
-    secondaryContainer = Color(0xFF0A3641),
-    onSecondaryContainer = Color(0xFF99F6E4),
-    tertiary = NeonTertiary,
-    onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFF5A0033),
-    onTertiaryContainer = Color(0xFFFFD8E4),
-    background = NeonBackground,
-    onBackground = NeonOnSurface,
-    surface = NeonSurface,
-    onSurface = NeonOnSurface,
-    surfaceVariant = NeonSurfaceVariant,
-    onSurfaceVariant = Color(0xFF94A3B8),
-    error = NeonError,
-    onError = Color(0xFFFFFFFF)
+private val ColoresClaros = lightColorScheme(
+    primary = Azul,
+    onPrimary = Color.White,
+    primaryContainer = AzulSuave,
+    onPrimaryContainer = AzulOscuro,
+    secondary = Turquesa,
+    onSecondary = Color.White,
+    secondaryContainer = TurquesaSuave,
+    onSecondaryContainer = TurquesaOscuro,
+    tertiary = Coral,
+    onTertiary = Color.White,
+    tertiaryContainer = CoralSuave,
+    background = Fondo,
+    onBackground = Texto,
+    surface = Tarjeta,
+    onSurface = Texto,
+    surfaceVariant = FondoImagen,
+    onSurfaceVariant = TextoSecundario,
+    surfaceContainer = Tarjeta,
+    surfaceContainerLow = Tarjeta,
+    surfaceContainerHigh = Tarjeta,
+    surfaceContainerHighest = Tarjeta,
+    outline = Borde,
+    outlineVariant = Borde,
+    error = Rojo,
+    errorContainer = RojoSuave
+)
+
+private val Formas = Shapes(
+    small = RoundedCornerShape(10.dp),
+    medium = RoundedCornerShape(14.dp),
+    large = RoundedCornerShape(18.dp)
 )
 
 @Composable
-fun CatalogoTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
-    content: @Composable () -> Unit
-) {
+fun CatalogoTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = CyberpunkDarkColorScheme,
+        colorScheme = ColoresClaros,
         typography = Typography,
+        shapes = Formas,
         content = content
     )
 }

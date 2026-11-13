@@ -1,3 +1,52 @@
 <resources>
     <string name="app_name">Catalogo</string>
+
+    <string name="cargando">Cargando…</string>
+    <string name="reintentar">Reintentar</string>
+    <string name="volver">Volver</string>
+
+    <string name="login_titulo">Catálogo de Smartphones</string>
+    <string name="login_subtitulo">Ingresa con tu cuenta</string>
+    <string name="login_correo">Correo</string>
+    <string name="login_correo_ejemplo">nombre@gmail.com</string>
+    <string name="login_clave">Contraseña</string>
+    <string name="login_ingresar">Ingresar</string>
+
+    <string name="lista_titulo">Smartphones</string>
+    <string name="lista_favoritos">Favoritos</string>
+    <string name="lista_admin">Panel Admin</string>
+    <string name="lista_salir">Cerrar sesión</string>
+    <string name="lista_vacia_titulo">No hay productos guardados</string>
+    <string name="lista_vacia_texto">Toca Actualizar para descargar el catálogo.</string>
+    <string name="lista_actualizar">Actualizar</string>
+    <string name="buscar_ejemplo">Buscar por nombre o marca</string>
+    <string name="buscar_limpiar">Borrar búsqueda</string>
+    <string name="buscar_sin_resultados_titulo">Sin resultados</string>
+    <string name="buscar_sin_resultados_texto">No encontramos smartphones con esa búsqueda.</string>
+    <string name="buscar_ver_todos">Ver todos</string>
+
+    <string name="favorito_agregar">Agregar a favoritos</string>
+    <string name="favorito_quitar">Quitar de favoritos</string>
+
+    <string name="detalle_titulo">Detalle</string>
+    <string name="detalle_calificacion">Calificación</string>
+    <string name="detalle_disponibles">%1$d disponibles</string>
+    <string name="detalle_agotado">Agotado</string>
+    <string name="detalle_descripcion">Descripción</string>
+
+    <string name="favoritos_titulo">Mis favoritos</string>
+    <string name="favoritos_vacio_titulo">Aún no tienes favoritos</string>
+    <string name="favoritos_vacio_texto">Toca el corazón de un smartphone para guardarlo aquí.</string>
+    <string name="favoritos_explorar">Explorar catálogo</string>
+
+    <string name="admin_titulo">Panel Admin</string>
+    <string name="admin_guardados">Guardados</string>
+    <string name="admin_favoritos">Favoritos</string>
+    <string name="admin_sincronizar">Sincronizar</string>
+    <string name="admin_sincronizando">Sincronizando…</string>
+    <string name="admin_limpiar">Limpiar caché</string>
+    <string name="admin_confirmar_titulo">¿Limpiar caché?</string>
+    <string name="admin_confirmar_texto">Se borrarán los productos guardados en el celular. Puedes volver a descargarlos con Sincronizar.</string>
+    <string name="admin_confirmar_si">Limpiar</string>
+    <string name="admin_confirmar_no">Cancelar</string>
 </resources>
