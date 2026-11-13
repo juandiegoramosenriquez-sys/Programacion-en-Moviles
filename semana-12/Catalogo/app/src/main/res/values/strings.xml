@@ -49,4 +49,34 @@
     <string name="admin_confirmar_texto">Se borrarán los productos guardados en el celular. Puedes volver a descargarlos con Sincronizar.</string>
     <string name="admin_confirmar_si">Limpiar</string>
     <string name="admin_confirmar_no">Cancelar</string>
+
+    <string name="nav_inicio">Inicio</string>
+    <string name="nav_favoritos">Favoritos</string>
+    <string name="nav_perfil">Perfil</string>
+    <string name="nav_admin">Admin</string>
+
+    <string name="lista_hola">Hola, %1$s</string>
+    <string name="buscar_todas">Todas</string>
+    <string name="rol_admin">Administrador</string>
+    <string name="rol_usuario">Usuario</string>
+
+    <string name="favoritos_guardados">guardados</string>
+    <string name="favoritos_valor_total">valor total</string>
+
+    <string name="perfil_rol">Rol: %1$s</string>
+    <string name="perfil_favoritos">Favoritos</string>
+    <string name="perfil_catalogo">En el catálogo</string>
+    <string name="perfil_mis_favoritos">Mis favoritos</string>
+    <string name="perfil_moneda">Moneda</string>
+    <string name="perfil_moneda_valor">Soles (S/)</string>
+    <string name="perfil_version">Versión de la app</string>
+    <string name="perfil_cerrar">Cerrar sesión</string>
+
+    <string name="detalle_precio">Precio</string>
+    <string name="detalle_datos">Datos rápidos</string>
+    <string name="detalle_stock">Disponibles</string>
+    <string name="detalle_marca">Marca</string>
+    <string name="detalle_guardar">Guardar en favoritos</string>
+    <string name="detalle_en_favoritos">En tus favoritos</string>
+    <string name="precio_referencial">Precio referencial en soles</string>
 </resources>

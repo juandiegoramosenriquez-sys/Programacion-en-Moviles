@@ -2,24 +2,31 @@ package com.tecsup.catalogo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Azul = Color(0xFF2563EB)
-val AzulSuave = Color(0xFFDBEAFE)
-val AzulOscuro = Color(0xFF1E3A8A)
+val Medianoche = Color(0xFF0B1026)
+val MedianocheClaro = Color(0xFF18204A)
+val TextoEncabezado = Color(0xFFFFFFFF)
+val TextoEncabezadoSuave = Color(0xFFA9AECB)
 
-val Turquesa = Color(0xFF0D9488)
-val TurquesaSuave = Color(0xFFCCFBF1)
-val TurquesaOscuro = Color(0xFF115E59)
+val Violeta = Color(0xFF7C5CFF)
+val VioletaSuave = Color(0xFFEDE9FF)
+val VioletaOscuro = Color(0xFF4C2FD6)
 
-val Coral = Color(0xFFF43F5E)
-val CoralSuave = Color(0xFFFFE4E6)
+val Cian = Color(0xFF22D3EE)
+val CianSuave = Color(0xFFCFFAFE)
+val CianOscuro = Color(0xFF155E75)
 
-val Fondo = Color(0xFFF8FAFC)
+val Rosa = Color(0xFFFF4D8D)
+val RosaSuave = Color(0xFFFFE3EF)
+val RosaOscuro = Color(0xFFC2185B)
+
+val Lavanda = Color(0xFFF6F5FF)
 val Tarjeta = Color(0xFFFFFFFF)
-val FondoImagen = Color(0xFFF1F5F9)
-val Borde = Color(0xFFE2E8F0)
-val Texto = Color(0xFF0F172A)
-val TextoSecundario = Color(0xFF64748B)
+val FondoImagen = Color(0xFFEEF0FF)
+val Borde = Color(0xFFE9E7F7)
+val Texto = Color(0xFF14142B)
+val TextoSecundario = Color(0xFF6E6B8F)
 
+val Ambar = Color(0xFFFFB020)
 val AmbarSuave = Color(0xFFFEF3C7)
 val AmbarOscuro = Color(0xFF92400E)
 val VerdeSuave = Color(0xFFDCFCE7)

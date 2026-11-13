@@ -2,6 +2,9 @@ package com.tecsup.catalogo.ui.lista
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,33 +19,30 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Logout
-import androidx.compose.material.icons.outlined.AdminPanelSettings
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.HeartBroken
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,74 +55,49 @@ import com.tecsup.catalogo.domain.model.Item
 import com.tecsup.catalogo.ui.UiState
 import com.tecsup.catalogo.ui.components.BotonFavorito
 import com.tecsup.catalogo.ui.components.Cargando
+import com.tecsup.catalogo.ui.components.Encabezado
 import com.tecsup.catalogo.ui.components.ErrorView
 import com.tecsup.catalogo.ui.components.EstadoVacio
 import com.tecsup.catalogo.ui.components.Etiqueta
+import com.tecsup.catalogo.ui.components.TituloEncabezado
 import com.tecsup.catalogo.ui.theme.AmbarOscuro
 import com.tecsup.catalogo.ui.theme.AmbarSuave
+import com.tecsup.catalogo.ui.theme.MedianocheClaro
+import com.tecsup.catalogo.ui.theme.TextoEncabezado
+import com.tecsup.catalogo.ui.theme.TextoEncabezadoSuave
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val marcas = listOf("Apple", "Samsung", "Oppo", "Realme", "Vivo")
+
 @Composable
 fun ListaScreen(
     viewModel: ListaViewModel,
-    onItemClick: (Int) -> Unit,
-    onVerFavoritos: () -> Unit,
-    onCerrarSesion: () -> Unit,
-    esAdmin: Boolean,
-    onAbrirAdmin: () -> Unit
+    nombre: String,
+    onItemClick: (Int) -> Unit
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val aviso by viewModel.aviso.collectAsStateWithLifecycle()
     val queryBusqueda by viewModel.queryBusqueda.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.lista_titulo), fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onVerFavoritos) {
-                        Icon(
-                            Icons.Outlined.FavoriteBorder,
-                            contentDescription = stringResource(R.string.lista_favoritos),
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                    if (esAdmin) {
-                        IconButton(onClick = onAbrirAdmin) {
-                            Icon(
-                                Icons.Outlined.AdminPanelSettings,
-                                contentDescription = stringResource(R.string.lista_admin),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                    IconButton(onClick = onCerrarSesion) {
-                        Icon(
-                            Icons.AutoMirrored.Outlined.Logout,
-                            contentDescription = stringResource(R.string.lista_salir),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+    Column(modifier = Modifier.fillMaxSize()) {
+        Encabezado {
+            Text(
+                text = stringResource(R.string.lista_hola, nombre),
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextoEncabezadoSuave
             )
+            TituloEncabezado(stringResource(R.string.lista_titulo))
+            Spacer(modifier = Modifier.height(12.dp))
+            Buscador(texto = queryBusqueda, onCambio = viewModel::onBusquedaChanged)
         }
-    ) { padding ->
-        val modifier = Modifier.padding(padding)
+        ChipsDeMarca(seleccion = queryBusqueda, onSeleccionar = viewModel::onBusquedaChanged)
+
         when (val e = estado) {
-            is UiState.Cargando -> Cargando(modifier)
-            is UiState.Error -> ErrorView(
-                mensaje = e.mensaje,
-                onReintentar = viewModel::refrescar,
-                modifier = modifier
-            )
-            is UiState.Exito -> Column(modifier = modifier.fillMaxSize()) {
+            is UiState.Cargando -> Cargando()
+            is UiState.Error -> ErrorView(mensaje = e.mensaje, onReintentar = viewModel::refrescar)
+            is UiState.Exito -> {
                 aviso?.let { texto ->
                     AvisoSinConexion(texto = texto, onReintentar = viewModel::refrescar)
                 }
-                Buscador(
-                    texto = queryBusqueda,
-                    onCambio = viewModel::onBusquedaChanged
-                )
                 when {
                     e.datos.isNotEmpty() -> LazyColumn(
                         modifier = Modifier.fillMaxSize(),
@@ -162,25 +137,55 @@ fun Buscador(texto: String, onCambio: (String) -> Unit) {
     OutlinedTextField(
         value = texto,
         onValueChange = onCambio,
-        placeholder = { Text(stringResource(R.string.buscar_ejemplo)) },
-        leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+        placeholder = { Text(stringResource(R.string.buscar_ejemplo), color = TextoEncabezadoSuave) },
+        leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null, tint = TextoEncabezadoSuave) },
         trailingIcon = {
             if (texto.isNotBlank()) {
                 IconButton(onClick = { onCambio("") }) {
-                    Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.buscar_limpiar))
+                    Icon(Icons.Outlined.Close, contentDescription = stringResource(R.string.buscar_limpiar), tint = TextoEncabezado)
                 }
             }
         },
         singleLine = true,
-        shape = RoundedCornerShape(50),
+        shape = RoundedCornerShape(8.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-            focusedContainerColor = MaterialTheme.colorScheme.surface
+            unfocusedContainerColor = MedianocheClaro,
+            focusedContainerColor = MedianocheClaro,
+            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = MaterialTheme.colorScheme.secondary,
+            focusedTextColor = TextoEncabezado,
+            unfocusedTextColor = TextoEncabezado,
+            cursorColor = MaterialTheme.colorScheme.secondary
         ),
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun ChipsDeMarca(seleccion: String, onSeleccionar: (String) -> Unit) {
+    val opciones = listOf(stringResource(R.string.buscar_todas) to "") + marcas.map { it to it }
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    )
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        opciones.forEach { (texto, valor) ->
+            val activo = seleccion.equals(valor, ignoreCase = true)
+            Text(
+                text = texto,
+                style = MaterialTheme.typography.labelLarge,
+                color = if (activo) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(if (activo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface)
+                    .border(1.dp, if (activo) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline, RoundedCornerShape(6.dp))
+                    .clickable { onSeleccionar(valor) }
+                    .padding(horizontal = 14.dp, vertical = 7.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -188,8 +193,8 @@ fun AvisoSinConexion(texto: String, onReintentar: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
+            .clip(RoundedCornerShape(8.dp))
             .background(AmbarSuave)
             .padding(start = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -209,9 +214,15 @@ fun AvisoSinConexion(texto: String, onReintentar: () -> Unit) {
 }
 
 @Composable
-fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
+fun ItemFila(
+    item: Item,
+    onClick: () -> Unit,
+    onFavorito: () -> Unit,
+    modoQuitar: Boolean = false
+) {
     Card(
         onClick = onClick,
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier.fillMaxWidth()
@@ -223,7 +234,7 @@ fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
             Box(
                 modifier = Modifier
                     .size(72.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
@@ -248,8 +259,8 @@ fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Etiqueta(
                     texto = item.marca,
-                    fondo = MaterialTheme.colorScheme.secondaryContainer,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                    fondo = MaterialTheme.colorScheme.primaryContainer,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -259,7 +270,24 @@ fun ItemFila(item: Item, onClick: () -> Unit, onFavorito: () -> Unit) {
                     fontWeight = FontWeight.Bold
                 )
             }
-            BotonFavorito(esFavorito = item.esFavorito, onClick = onFavorito)
+            if (modoQuitar) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onFavorito)
+                        .padding(8.dp)
+                ) {
+                    Icon(Icons.Outlined.HeartBroken, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary)
+                    Text(
+                        text = stringResource(R.string.favorito_quitar).substringBefore(" "),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+            } else {
+                BotonFavorito(esFavorito = item.esFavorito, onClick = onFavorito)
+            }
         }
     }
 }

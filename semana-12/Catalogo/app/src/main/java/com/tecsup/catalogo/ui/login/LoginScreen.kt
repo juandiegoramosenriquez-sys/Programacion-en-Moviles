@@ -5,13 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
@@ -41,6 +44,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.catalogo.R
 import com.tecsup.catalogo.ui.UiState
 import com.tecsup.catalogo.ui.components.Cargando
+import com.tecsup.catalogo.ui.components.Encabezado
+import com.tecsup.catalogo.ui.theme.Cian
+import com.tecsup.catalogo.ui.theme.MedianocheClaro
+import com.tecsup.catalogo.ui.theme.TextoEncabezado
+import com.tecsup.catalogo.ui.theme.TextoEncabezadoSuave
 
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit) {
@@ -61,42 +69,41 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState())
     ) {
-        Box(
-            modifier = Modifier
-                .size(72.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.PhoneAndroid,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(38.dp)
+        Encabezado(alineacion = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Box(
+                modifier = Modifier
+                    .size(76.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MedianocheClaro),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Outlined.PhoneAndroid, contentDescription = null, tint = Cian, modifier = Modifier.size(40.dp))
+            }
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text = stringResource(R.string.login_titulo),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = TextoEncabezado
             )
+            Text(
+                text = stringResource(R.string.login_subtitulo),
+                style = MaterialTheme.typography.bodyMedium,
+                color = TextoEncabezadoSuave
+            )
+            Spacer(modifier = Modifier.height(24.dp))
         }
-        Text(
-            text = stringResource(R.string.login_titulo),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = stringResource(R.string.login_subtitulo),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
 
         Card(
+            shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 12.dp)
+                .padding(20.dp)
         ) {
             Column(
                 modifier = Modifier.padding(20.dp),
@@ -109,6 +116,7 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit) {
                     placeholder = { Text(stringResource(R.string.login_correo_ejemplo)) },
                     leadingIcon = { Icon(Icons.Outlined.Email, contentDescription = null) },
                     singleLine = true,
+                    shape = RoundedCornerShape(8.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -118,20 +126,18 @@ fun LoginScreen(viewModel: LoginViewModel, onLoginExitoso: () -> Unit) {
                     label = { Text(stringResource(R.string.login_clave)) },
                     leadingIcon = { Icon(Icons.Outlined.Lock, contentDescription = null) },
                     singleLine = true,
+                    shape = RoundedCornerShape(8.dp),
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     modifier = Modifier.fillMaxWidth()
                 )
                 val e = estado
                 if (e is UiState.Error) {
-                    Text(
-                        text = e.mensaje,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text(text = e.mensaje, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
                 }
                 Button(
                     onClick = { viewModel.iniciarSesion(correo, clave) },
+                    shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)

@@ -12,4 +12,5 @@ data class Item(
 ) {
     val marca: String get() = subtitulo.substringBefore(" · ")
     val precio: String get() = subtitulo.substringAfter(" · ", "")
+    val precioNumero: Double get() = precio.substringAfter("S/ ", "").toDoubleOrNull() ?: 0.0
 }

@@ -8,19 +8,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
-private val ColoresClaros = lightColorScheme(
-    primary = Azul,
+private val ColoresAurora = lightColorScheme(
+    primary = Violeta,
     onPrimary = Color.White,
-    primaryContainer = AzulSuave,
-    onPrimaryContainer = AzulOscuro,
-    secondary = Turquesa,
-    onSecondary = Color.White,
-    secondaryContainer = TurquesaSuave,
-    onSecondaryContainer = TurquesaOscuro,
-    tertiary = Coral,
+    primaryContainer = VioletaSuave,
+    onPrimaryContainer = VioletaOscuro,
+    secondary = Cian,
+    onSecondary = Medianoche,
+    secondaryContainer = CianSuave,
+    onSecondaryContainer = CianOscuro,
+    tertiary = Rosa,
     onTertiary = Color.White,
-    tertiaryContainer = CoralSuave,
-    background = Fondo,
+    tertiaryContainer = RosaSuave,
+    onTertiaryContainer = RosaOscuro,
+    background = Lavanda,
     onBackground = Texto,
     surface = Tarjeta,
     onSurface = Texto,
@@ -30,6 +31,8 @@ private val ColoresClaros = lightColorScheme(
     surfaceContainerLow = Tarjeta,
     surfaceContainerHigh = Tarjeta,
     surfaceContainerHighest = Tarjeta,
+    inverseSurface = Medianoche,
+    inverseOnSurface = TextoEncabezado,
     outline = Borde,
     outlineVariant = Borde,
     error = Rojo,
@@ -37,15 +40,17 @@ private val ColoresClaros = lightColorScheme(
 )
 
 private val Formas = Shapes(
-    small = RoundedCornerShape(10.dp),
-    medium = RoundedCornerShape(14.dp),
-    large = RoundedCornerShape(18.dp)
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(6.dp),
+    medium = RoundedCornerShape(10.dp),
+    large = RoundedCornerShape(12.dp),
+    extraLarge = RoundedCornerShape(14.dp)
 )
 
 @Composable
 fun CatalogoTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = ColoresClaros,
+        colorScheme = ColoresAurora,
         typography = Typography,
         shapes = Formas,
         content = content

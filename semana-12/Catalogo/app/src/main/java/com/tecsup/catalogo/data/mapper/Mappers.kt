@@ -3,11 +3,18 @@ package com.tecsup.catalogo.data.mapper
 import com.tecsup.catalogo.data.local.ItemEntity
 import com.tecsup.catalogo.data.remote.dto.ItemDto
 import com.tecsup.catalogo.domain.model.Item
+import java.util.Locale
+
+const val TIPO_DE_CAMBIO = 3.75
+
+fun enSoles(dolares: Double): String = String.format(Locale.US, "S/ %.2f", dolares * TIPO_DE_CAMBIO)
+
+private fun ItemDto.subtitulo(): String = "${brand ?: "Sin marca"} · ${enSoles(price)}"
 
 fun ItemDto.aModelo(esFavorito: Boolean = false): Item = Item(
     id = id,
     titulo = title,
-    subtitulo = "${brand ?: "Sin marca"} · \$$price",
+    subtitulo = subtitulo(),
     imagenUrl = thumbnail,
     esFavorito = esFavorito,
     descripcion = description,
@@ -18,7 +25,7 @@ fun ItemDto.aModelo(esFavorito: Boolean = false): Item = Item(
 fun ItemDto.aEntity(esFavorito: Boolean = false): ItemEntity = ItemEntity(
     id = id,
     titulo = title,
-    subtitulo = "${brand ?: "Sin marca"} · \$$price",
+    subtitulo = subtitulo(),
     imagenUrl = thumbnail,
     descripcion = description,
     rating = rating,
