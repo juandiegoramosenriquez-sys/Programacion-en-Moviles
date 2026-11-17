@@ -33,6 +33,14 @@ fun MapaUbicacion(
         }
     }
 
+    LaunchedEffect(seleccionado) {
+        val lugar = lugares.firstOrNull { it.lugar.id == seleccionado }?.lugar
+        if (lugar != null) {
+            val destino = LatLng(lugar.latitud, lugar.longitud)
+            camara.animate(CameraUpdateFactory.newLatLngZoom(destino, 17f))
+        }
+    }
+
     GoogleMap(modifier = modifier, cameraPositionState = camara) {
         if (estado is UbicacionUi.Lista) {
             val miPosicion = LatLng(estado.posicion.latitud, estado.posicion.longitud)
@@ -44,10 +52,14 @@ fun MapaUbicacion(
 
         lugares.forEach { item ->
             key(item.lugar.id) {
+                val estadoMarcador = rememberUpdatedMarkerState(
+                    position = LatLng(item.lugar.latitud, item.lugar.longitud)
+                )
+                LaunchedEffect(seleccionado) {
+                    if (seleccionado == item.lugar.id) estadoMarcador.showInfoWindow()
+                }
                 Marker(
-                    state = rememberUpdatedMarkerState(
-                        position = LatLng(item.lugar.latitud, item.lugar.longitud)
-                    ),
+                    state = estadoMarcador,
                     title = item.lugar.nombre,
                     snippet = item.lugar.categoria,
                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
