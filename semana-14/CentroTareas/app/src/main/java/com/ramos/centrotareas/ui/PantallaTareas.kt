@@ -51,6 +51,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val primos by vm.primos.collectAsState()
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
+    val limiteTiempo by vm.limiteTiempo.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
     var numero by rememberSaveable { mutableStateOf("500000") }
 
@@ -146,6 +147,16 @@ fun PantallaTareas(vm: TareasViewModel) {
                         onCheckedChange = { vm.cambiarSimularError(it) }
                     )
                     Text("Simular error")
+                }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Switch(
+                        checked = limiteTiempo,
+                        onCheckedChange = { vm.cambiarLimiteTiempo(it) }
+                    )
+                    Text("Tiempo máximo 4 s")
                 }
                 when (val c = carga) {
                     CargaUi.Inicial -> {}
