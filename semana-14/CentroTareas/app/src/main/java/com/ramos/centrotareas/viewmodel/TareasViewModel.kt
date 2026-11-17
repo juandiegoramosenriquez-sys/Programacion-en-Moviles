@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ramos.centrotareas.data.HistorialRepository
 import com.ramos.centrotareas.data.TareasRepository
 import com.ramos.centrotareas.model.CargaUi
+import com.ramos.centrotareas.model.ComparacionTiempos
 import com.ramos.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import java.time.LocalTime
@@ -102,6 +104,13 @@ class TareasViewModel(
     private val _carga = MutableStateFlow<CargaUi>(CargaUi.Inicial)
     val carga: StateFlow<CargaUi> = _carga.asStateFlow()
 
+    private val _comparacion = MutableStateFlow(ComparacionTiempos())
+    val comparacion: StateFlow<ComparacionTiempos> = _comparacion.asStateFlow()
+
+    fun limpiarComparacion() {
+        _comparacion.value = ComparacionTiempos()
+    }
+
     private val _simularError = MutableStateFlow(false)
     val simularError: StateFlow<Boolean> = _simularError.asStateFlow()
 
@@ -153,6 +162,7 @@ class TareasViewModel(
                 }
                 val ms = System.currentTimeMillis() - inicio
                 _carga.value = CargaUi.Exito("Una por una", perfil, pedidos.size, ms)
+                _comparacion.update { it.copy(unaPorUna = it.unaPorUna + ms) }
                 guardar("Una por una: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado: más de ${LIMITE_MS / 1000} s")
@@ -180,6 +190,7 @@ class TareasViewModel(
                 }
                 val ms = System.currentTimeMillis() - inicio
                 _carga.value = CargaUi.Exito("A la vez", perfil, pedidos.size, ms)
+                _comparacion.update { it.copy(aLaVez = it.aLaVez + ms) }
                 guardar("A la vez: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado: más de ${LIMITE_MS / 1000} s")

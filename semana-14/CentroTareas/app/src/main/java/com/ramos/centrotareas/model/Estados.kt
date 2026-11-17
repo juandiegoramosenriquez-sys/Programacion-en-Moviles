@@ -20,3 +20,25 @@ sealed interface CargaUi {
 }
 
 data class AvancePrimos(val porcentaje: Float, val cantidad: Int, val terminado: Boolean)
+
+data class ComparacionTiempos(
+    val unaPorUna: List<Long> = emptyList(),
+    val aLaVez: List<Long> = emptyList()
+) {
+    val promedioUnaPorUna: Long? get() = unaPorUna.takeIf { it.isNotEmpty() }?.average()?.toLong()
+    val promedioALaVez: Long? get() = aLaVez.takeIf { it.isNotEmpty() }?.average()?.toLong()
+
+    val ahorroMs: Long?
+        get() {
+            val lento = promedioUnaPorUna ?: return null
+            val rapido = promedioALaVez ?: return null
+            return lento - rapido
+        }
+
+    val ahorroPorcentaje: Int?
+        get() {
+            val lento = promedioUnaPorUna ?: return null
+            val ahorro = ahorroMs ?: return null
+            return if (lento > 0) (ahorro * 100 / lento).toInt() else null
+        }
+}

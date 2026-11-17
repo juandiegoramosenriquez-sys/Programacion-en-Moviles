@@ -54,6 +54,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val limiteTiempo by vm.limiteTiempo.collectAsState()
     val intento by vm.intento.collectAsState()
     val historial by vm.historial.collectAsState()
+    val comparacion by vm.comparacion.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
     var numero by rememberSaveable { mutableStateOf("500000") }
 
@@ -184,6 +185,23 @@ fun PantallaTareas(vm: TareasViewModel) {
                     }
                 }
             }
+            TarjetaTarea("Comparación de tiempos") {
+                val lento = comparacion.promedioUnaPorUna
+                val rapido = comparacion.promedioALaVez
+                if (lento == null && rapido == null) {
+                    Text("Prueba Una por una y A la vez para comparar")
+                } else {
+                    val maximo = maxOf(lento ?: 0L, rapido ?: 0L).coerceAtLeast(1L)
+                    BarraTiempo("Una por una", lento, comparacion.unaPorUna.size, maximo)
+                    BarraTiempo("A la vez", rapido, comparacion.aLaVez.size, maximo)
+                    val ahorro = comparacion.ahorroMs
+                    val porcentaje = comparacion.ahorroPorcentaje
+                    if (ahorro != null && porcentaje != null) {
+                        Recuadro("async ahorró $ahorro ms ($porcentaje %)", VerdeFondo, VerdeTexto)
+                    }
+                    OutlinedButton(onClick = { vm.limpiarComparacion() }) { Text("Limpiar") }
+                }
+            }
             TarjetaTarea("Historial") {
                 if (historial.isEmpty()) {
                     Text("Todavía no hay resultados guardados")
@@ -224,5 +242,19 @@ private fun Recuadro(texto: String, fondo: Color, color: Color) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(texto, color = color, modifier = Modifier.padding(12.dp))
+    }
+}
+
+@Composable
+private fun BarraTiempo(modo: String, promedio: Long?, veces: Int, maximo: Long) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            if (promedio == null) "$modo: sin datos" else "$modo: $promedio ms (promedio de $veces)",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        LinearProgressIndicator(
+            progress = { (promedio ?: 0L).toFloat() / maximo },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
