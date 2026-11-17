@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.ramos.centrotareas.model.CargaUi
 import com.ramos.centrotareas.model.PrimosUi
 import com.ramos.centrotareas.viewmodel.TareasViewModel
 
@@ -47,6 +48,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val progreso by vm.progreso.collectAsState()
     val corriendo by vm.corriendo.collectAsState()
     val primos by vm.primos.collectAsState()
+    val carga by vm.carga.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
     var numero by rememberSaveable { mutableStateOf("500000") }
 
@@ -123,6 +125,30 @@ fun PantallaTareas(vm: TareasViewModel) {
                 }
             }
             TarjetaTarea("Dos cargas") {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = { vm.cargarUnaPorUna() },
+                        enabled = carga !is CargaUi.Cargando
+                    ) { Text("Una por una") }
+                    Button(
+                        onClick = { vm.cargarALaVez() },
+                        enabled = carga !is CargaUi.Cargando
+                    ) { Text("A la vez") }
+                }
+                when (val c = carga) {
+                    CargaUi.Inicial -> {}
+                    CargaUi.Cargando -> CircularProgressIndicator()
+                    is CargaUi.Exito -> Recuadro(
+                        "Modo: ${c.modo}\nPerfil: ${c.perfil}\nPedidos: ${c.pedidos}\nTiempo: ${c.milisegundos} ms",
+                        VerdeFondo,
+                        VerdeTexto
+                    )
+                    is CargaUi.Error -> Recuadro(
+                        c.mensaje,
+                        MaterialTheme.colorScheme.errorContainer,
+                        MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
             }
         }
     }
