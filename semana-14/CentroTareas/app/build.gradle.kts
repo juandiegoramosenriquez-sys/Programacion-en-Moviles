@@ -51,6 +51,9 @@ dependencies {
     // DataStore: guarda el historial de resultados aunque se cierre la app
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
+    // Iconos de Material para las tarjetas y botones del rediseno
+    implementation("androidx.compose.material:material-icons-extended")
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
