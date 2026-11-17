@@ -109,12 +109,12 @@ fun PantallaTareas(vm: TareasViewModel) {
                 }
                 when (val p = primos) {
                     PrimosUi.Inicial -> {}
-                    PrimosUi.Calculando -> Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                        Text("Calculando...")
+                    is PrimosUi.Calculando -> Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        LinearProgressIndicator(
+                            progress = { p.porcentaje },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Text("Calculando ${(p.porcentaje * 100).toInt()} %: ${p.parcial} primos hasta ahora")
                     }
                     is PrimosUi.Listo -> Recuadro(
                         "${p.cantidad} primos en ${p.milisegundos} ms",
