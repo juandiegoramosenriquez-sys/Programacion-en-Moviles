@@ -21,6 +21,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -49,6 +50,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val corriendo by vm.corriendo.collectAsState()
     val primos by vm.primos.collectAsState()
     val carga by vm.carga.collectAsState()
+    val simularError by vm.simularError.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
     var numero by rememberSaveable { mutableStateOf("500000") }
 
@@ -135,6 +137,16 @@ fun PantallaTareas(vm: TareasViewModel) {
                         enabled = carga !is CargaUi.Cargando
                     ) { Text("A la vez") }
                 }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Switch(
+                        checked = simularError,
+                        onCheckedChange = { vm.cambiarSimularError(it) }
+                    )
+                    Text("Simular error")
+                }
                 when (val c = carga) {
                     CargaUi.Inicial -> {}
                     CargaUi.Cargando -> CircularProgressIndicator()
@@ -143,11 +155,14 @@ fun PantallaTareas(vm: TareasViewModel) {
                         VerdeFondo,
                         VerdeTexto
                     )
-                    is CargaUi.Error -> Recuadro(
-                        c.mensaje,
-                        MaterialTheme.colorScheme.errorContainer,
-                        MaterialTheme.colorScheme.onErrorContainer
-                    )
+                    is CargaUi.Error -> {
+                        Recuadro(
+                            c.mensaje,
+                            MaterialTheme.colorScheme.errorContainer,
+                            MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Button(onClick = { vm.cargarALaVez() }) { Text("Reintentar") }
+                    }
                 }
             }
         }
