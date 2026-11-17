@@ -53,6 +53,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val simularError by vm.simularError.collectAsState()
     val limiteTiempo by vm.limiteTiempo.collectAsState()
     val intento by vm.intento.collectAsState()
+    val historial by vm.historial.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
     var numero by rememberSaveable { mutableStateOf("500000") }
 
@@ -181,6 +182,13 @@ fun PantallaTareas(vm: TareasViewModel) {
                         )
                         Button(onClick = { vm.cargarALaVez() }) { Text("Reintentar") }
                     }
+                }
+            }
+            TarjetaTarea("Historial") {
+                if (historial.isEmpty()) {
+                    Text("Todavía no hay resultados guardados")
+                } else {
+                    historial.forEach { Text(it) }
                 }
             }
         }

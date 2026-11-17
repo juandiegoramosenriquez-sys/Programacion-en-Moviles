@@ -11,7 +11,7 @@ import com.ramos.centrotareas.viewmodel.TareasViewModel
 import com.ramos.centrotareas.viewmodel.TareasViewModelFactory
 
 class MainActivity : ComponentActivity() {
-    private val vm: TareasViewModel by viewModels { TareasViewModelFactory() }
+    private val vm: TareasViewModel by viewModels { TareasViewModelFactory(applicationContext) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

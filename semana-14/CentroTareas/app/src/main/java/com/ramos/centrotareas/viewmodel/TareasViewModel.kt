@@ -3,6 +3,7 @@ package com.ramos.centrotareas.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ramos.centrotareas.data.HistorialRepository
 import com.ramos.centrotareas.data.TareasRepository
 import com.ramos.centrotareas.model.CargaUi
 import com.ramos.centrotareas.model.PrimosUi
@@ -13,12 +14,27 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
-class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
+class TareasViewModel(
+    private val repo: TareasRepository,
+    private val historialRepo: HistorialRepository
+) : ViewModel() {
+    val historial: StateFlow<List<String>> = historialRepo.historial
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    private suspend fun guardar(resultado: String) {
+        val hora = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm"))
+        historialRepo.agregar("$hora  $resultado")
+    }
+
     private val _mensaje = MutableStateFlow("Listo")
     val mensaje: StateFlow<String> = _mensaje.asStateFlow()
 
@@ -64,10 +80,12 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             val inicio = System.currentTimeMillis()
             try {
                 repo.contarPrimosConProgreso(hasta).collect { avance ->
-                    _primos.value = if (avance.terminado) {
-                        PrimosUi.Listo(avance.cantidad, System.currentTimeMillis() - inicio)
+                    if (avance.terminado) {
+                        val ms = System.currentTimeMillis() - inicio
+                        _primos.value = PrimosUi.Listo(avance.cantidad, ms)
+                        guardar("Primos hasta $hasta: ${avance.cantidad} en $ms ms")
                     } else {
-                        PrimosUi.Calculando(avance.porcentaje, avance.cantidad)
+                        _primos.value = PrimosUi.Calculando(avance.porcentaje, avance.cantidad)
                     }
                 }
             } catch (e: CancellationException) {
@@ -133,12 +151,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                     val pedidos = conReintento { repo.cargarPedidos(_simularError.value) }
                     Pair(perfil, pedidos)
                 }
-                _carga.value = CargaUi.Exito(
-                    "Una por una",
-                    perfil,
-                    pedidos.size,
-                    System.currentTimeMillis() - inicio
-                )
+                val ms = System.currentTimeMillis() - inicio
+                _carga.value = CargaUi.Exito("Una por una", perfil, pedidos.size, ms)
+                guardar("Una por una: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado: más de ${LIMITE_MS / 1000} s")
             } catch (e: CancellationException) {
@@ -163,12 +178,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                         Pair(a.await(), b.await())
                     }
                 }
-                _carga.value = CargaUi.Exito(
-                    "A la vez",
-                    perfil,
-                    pedidos.size,
-                    System.currentTimeMillis() - inicio
-                )
+                val ms = System.currentTimeMillis() - inicio
+                _carga.value = CargaUi.Exito("A la vez", perfil, pedidos.size, ms)
+                guardar("A la vez: $ms ms")
             } catch (e: TimeoutCancellationException) {
                 _carga.value = CargaUi.Error("Tardó demasiado: más de ${LIMITE_MS / 1000} s")
             } catch (e: CancellationException) {

@@ -48,6 +48,9 @@ dependencies {
     // ViewModel y viewModelScope: corrutinas que no bloquean la pantalla
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
+    // DataStore: guarda el historial de resultados aunque se cierre la app
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
