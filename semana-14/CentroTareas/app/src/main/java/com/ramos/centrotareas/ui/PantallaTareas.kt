@@ -52,6 +52,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
     val limiteTiempo by vm.limiteTiempo.collectAsState()
+    val intento by vm.intento.collectAsState()
     var toques by rememberSaveable { mutableIntStateOf(0) }
     var numero by rememberSaveable { mutableStateOf("500000") }
 
@@ -160,7 +161,13 @@ fun PantallaTareas(vm: TareasViewModel) {
                 }
                 when (val c = carga) {
                     CargaUi.Inicial -> {}
-                    CargaUi.Cargando -> CircularProgressIndicator()
+                    CargaUi.Cargando -> Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                        Text(if (intento > 1) "Reintentando: intento $intento de 3" else "Cargando...")
+                    }
                     is CargaUi.Exito -> Recuadro(
                         "Modo: ${c.modo}\nPerfil: ${c.perfil}\nPedidos: ${c.pedidos}\nTiempo: ${c.milisegundos} ms",
                         VerdeFondo,

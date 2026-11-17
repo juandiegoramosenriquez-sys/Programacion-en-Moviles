@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -92,18 +93,39 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
         _limiteTiempo.value = valor
     }
 
+    private val _intento = MutableStateFlow(0)
+    val intento: StateFlow<Int> = _intento.asStateFlow()
+
+    private suspend fun <T> conReintento(bloque: suspend () -> T): T {
+        var espera = ESPERA_INICIAL_MS
+        repeat(INTENTOS - 1) {
+            _intento.value = it + 1
+            try {
+                return bloque()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                delay(espera)
+                espera *= 2
+            }
+        }
+        _intento.value = INTENTOS
+        return bloque()
+    }
+
     private suspend fun <T> conLimite(bloque: suspend () -> T): T =
         if (_limiteTiempo.value) withTimeout(LIMITE_MS) { bloque() } else bloque()
 
     fun cargarUnaPorUna() {
         if (_carga.value is CargaUi.Cargando) return
         _carga.value = CargaUi.Cargando
+        _intento.value = 0
         viewModelScope.launch {
             val inicio = System.currentTimeMillis()
             try {
                 val (perfil, pedidos) = conLimite {
                     val perfil = repo.cargarPerfil()
-                    val pedidos = repo.cargarPedidos(_simularError.value)
+                    val pedidos = conReintento { repo.cargarPedidos(_simularError.value) }
                     Pair(perfil, pedidos)
                 }
                 _carga.value = CargaUi.Exito(
@@ -125,13 +147,14 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     fun cargarALaVez() {
         if (_carga.value is CargaUi.Cargando) return
         _carga.value = CargaUi.Cargando
+        _intento.value = 0
         viewModelScope.launch {
             val inicio = System.currentTimeMillis()
             try {
                 val (perfil, pedidos) = conLimite {
                     coroutineScope {
                         val a = async { repo.cargarPerfil() }
-                        val b = async { repo.cargarPedidos(_simularError.value) }
+                        val b = async { conReintento { repo.cargarPedidos(_simularError.value) } }
                         Pair(a.await(), b.await())
                     }
                 }
@@ -153,5 +176,7 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
     companion object {
         private const val LIMITE_MS = 4000L
+        private const val INTENTOS = 3
+        private const val ESPERA_INICIAL_MS = 500L
     }
 }
