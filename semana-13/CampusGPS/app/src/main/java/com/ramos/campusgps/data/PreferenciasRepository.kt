@@ -5,4 +5,6 @@ import kotlinx.coroutines.flow.Flow
 interface PreferenciasRepository {
     val ultimoLugar: Flow<Int?>
     suspend fun guardarUltimoLugar(id: Int)
+    val modoOscuro: Flow<Boolean?>
+    suspend fun guardarModoOscuro(oscuro: Boolean)
 }

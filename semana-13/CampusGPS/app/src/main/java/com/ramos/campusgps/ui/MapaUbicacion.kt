@@ -75,9 +75,9 @@ fun MapaUbicacion(
             Circle(
                 center = miPosicion,
                 radius = radio.toDouble(),
-                strokeColor = Color(0xFF1565C0),
+                strokeColor = Color(0xFF2563EB),
                 strokeWidth = 4f,
-                fillColor = Color(0x331565C0)
+                fillColor = Color(0x332563EB)
             )
         }
 

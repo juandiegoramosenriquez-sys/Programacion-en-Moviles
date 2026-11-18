@@ -4,24 +4,31 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Stop
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,16 +37,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.ramos.campusgps.model.UbicacionUi
 import com.ramos.campusgps.util.formatearDistancia
 import com.ramos.campusgps.viewmodel.MapaViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaMapa(vm: MapaViewModel) {
+fun PantallaMapa(vm: MapaViewModel, oscuro: Boolean) {
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugaresVisibles.collectAsState()
     val categoria by vm.categoria.collectAsState()
@@ -80,99 +88,124 @@ fun PantallaMapa(vm: MapaViewModel) {
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("CampusGPS") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FiltroCategorias(
-                categorias = vm.categorias,
-                seleccionada = categoria,
-                onElegir = { vm.filtrar(it) },
-                modifier = Modifier.fillMaxWidth()
-            )
+    val distanciaCercano = masCercano?.let { lugar ->
+        lugares.firstOrNull { it.lugar.id == lugar.id }?.metros?.let { formatearDistancia(it) }
+    }
 
-            SelectorRadio(
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+        Column(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
+            CabeceraPanel(
+                masCercano = distanciaCercano ?: "—",
+                enRadio = "${lugares.count { it.lugar.id in dentroDelRadio }} de ${lugares.size}",
+                ultimo = ultimoVisitado?.nombre ?: "—",
+                siguiendo = siguiendo,
                 radios = vm.radios,
-                seleccionado = radio,
-                onElegir = { vm.elegirRadio(it) },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            MapaUbicacion(
-                estado = estado,
-                lugares = lugares,
-                seleccionado = seleccionado,
-                masCercano = masCercano,
                 radio = radio,
-                permisoConcedido = permisoConcedido,
-                modoOscuro = isSystemInDarkTheme(),
-                modifier = Modifier.fillMaxWidth().weight(1f)
+                onRadio = { vm.elegirRadio(it) },
+                oscuro = oscuro,
+                onCambiarTema = { vm.cambiarTema(oscuro) }
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = { alPulsar() },
-                    enabled = estado !is UbicacionUi.Buscando && !siguiendo
-                ) { Text("Obtener mi ubicación") }
+            Column(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FiltroCategorias(
+                    categorias = vm.categorias,
+                    seleccionada = categoria,
+                    onElegir = { vm.filtrar(it) },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-                FilledTonalButton(
-                    onClick = {
-                        when {
-                            siguiendo -> vm.detenerSeguimiento()
-                            tienePermiso() -> {
-                                permisoConcedido = true
-                                vm.iniciarSeguimiento()
+                MapaUbicacion(
+                    estado = estado,
+                    lugares = lugares,
+                    seleccionado = seleccionado,
+                    masCercano = masCercano,
+                    radio = radio,
+                    permisoConcedido = permisoConcedido,
+                    modoOscuro = oscuro,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .clip(MaterialTheme.shapes.medium)
+                        .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), MaterialTheme.shapes.medium)
+                )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { alPulsar() },
+                        enabled = estado !is UbicacionUi.Buscando && !siguiendo,
+                        shape = MaterialTheme.shapes.medium,
+                        modifier = Modifier.weight(1.6f).height(48.dp)
+                    ) {
+                        Icon(Icons.Outlined.MyLocation, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Obtener mi ubicación", fontWeight = FontWeight.SemiBold, maxLines = 1)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            when {
+                                siguiendo -> vm.detenerSeguimiento()
+                                tienePermiso() -> {
+                                    permisoConcedido = true
+                                    vm.iniciarSeguimiento()
+                                }
+                                else -> alPulsar()
                             }
-                            else -> alPulsar()
+                        },
+                        shape = MaterialTheme.shapes.medium,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        modifier = Modifier.weight(1f).height(48.dp)
+                    ) {
+                        Icon(
+                            if (siguiendo) Icons.Outlined.Stop else Icons.Outlined.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(if (siguiendo) "Detener" else "Iniciar", fontWeight = FontWeight.SemiBold)
+                    }
+                }
+
+                when (val e = estado) {
+                    UbicacionUi.Buscando -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                    is UbicacionUi.Error -> MensajeError(error = e, onReintentar = { alPulsar() })
+                    else -> Unit
+                }
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            masCercano?.let { "Más cercano: ${it.nombre}" } ?: "Pulsa el botón para ver tu ubicación",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
+                        )
+                        (estado as? UbicacionUi.Lista)?.let {
+                            Text(
+                                "Latitud: ${"%.4f".format(it.posicion.latitud)} · Longitud: ${"%.4f".format(it.posicion.longitud)}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
-                ) { Text(if (siguiendo) "Detener" else "Iniciar") }
-            }
-
-            if (siguiendo) Text("Siguiendo tu ubicación en vivo")
-
-            OutlinedButton(
-                onClick = { masCercano?.let { vm.seleccionar(it.id) } },
-                enabled = masCercano != null
-            ) { Text("Ir al más cercano") }
-
-            masCercano?.let { lugar ->
-                val metros = lugares.firstOrNull { it.lugar.id == lugar.id }?.metros
-                val distancia = metros?.let { formatearDistancia(it) } ?: ""
-                Text("Más cercano: ${lugar.nombre} ($distancia)")
-            }
-
-            ultimoVisitado?.let { Text("Último lugar visitado: ${it.nombre}") }
-
-            when (val e = estado) {
-                UbicacionUi.Inicial -> Text("Pulsa el botón para ver tu ubicación")
-                UbicacionUi.Buscando -> CircularProgressIndicator()
-                is UbicacionUi.Lista -> {
-                    Text("Latitud: ${e.posicion.latitud}")
-                    Text("Longitud: ${e.posicion.longitud}")
+                    TextButton(
+                        onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                        enabled = masCercano != null
+                    ) { Text("Ir al más cercano", fontWeight = FontWeight.SemiBold) }
                 }
-                is UbicacionUi.Error -> MensajeError(error = e, onReintentar = { alPulsar() })
-            }
 
-            ListaLugares(
-                lugares = lugares,
-                seleccionado = seleccionado,
-                dentroDelRadio = dentroDelRadio,
-                onClick = { vm.seleccionar(it) },
-                modifier = Modifier.fillMaxWidth().height(220.dp)
-            )
+                ListaLugares(
+                    lugares = lugares,
+                    seleccionado = seleccionado,
+                    dentroDelRadio = dentroDelRadio,
+                    masCercano = masCercano?.id,
+                    onClick = { vm.seleccionar(it) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }

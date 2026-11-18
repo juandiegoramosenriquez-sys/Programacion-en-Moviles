@@ -53,6 +53,13 @@ class MapaViewModel(
         .map { id -> lugaresRepo.obtenerLugares().firstOrNull { it.id == id } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val modoOscuro: StateFlow<Boolean?> = preferenciasRepo.modoOscuro
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    fun cambiarTema(oscuroActual: Boolean) {
+        viewModelScope.launch { preferenciasRepo.guardarModoOscuro(!oscuroActual) }
+    }
+
     init {
         viewModelScope.launch {
             _seleccionado.value = preferenciasRepo.ultimoLugar.first()

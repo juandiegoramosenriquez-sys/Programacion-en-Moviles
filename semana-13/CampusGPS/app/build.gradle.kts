@@ -64,6 +64,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     // Guarda datos pequeños en el celular (último lugar visitado)
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    // Iconos de Material para categorias y botones
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

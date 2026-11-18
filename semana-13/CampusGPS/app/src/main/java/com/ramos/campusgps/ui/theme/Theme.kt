@@ -1,58 +1,82 @@
 package com.ramos.campusgps.ui.theme
 
-import android.app.Activity
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Azul80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val EsquemaClaro = lightColorScheme(
+    primary = Acento,
+    onPrimary = Color.White,
+    primaryContainer = AcentoSuave,
+    onPrimaryContainer = AcentoTexto,
+    secondary = Noche,
+    onSecondary = Color.White,
+    secondaryContainer = NocheMedio,
+    onSecondaryContainer = Color.White,
+    tertiary = Verde,
+    onTertiary = Color.White,
+    background = Fondo,
+    onBackground = Texto,
+    surface = Superficie,
+    onSurface = Texto,
+    surfaceVariant = SuperficieTenue,
+    onSurfaceVariant = TextoSuave,
+    outline = Borde,
+    outlineVariant = Borde,
+    error = Rojo,
+    onError = Color.White,
+    errorContainer = RojoSuave,
+    onErrorContainer = RojoTexto
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Azul40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+private val EsquemaOscuro = darkColorScheme(
+    primary = AcentoCarbon,
     onPrimary = Color.White,
-    onSecondary = Color.White,
+    primaryContainer = AcentoCarbonSuave,
+    onPrimaryContainer = AcentoCarbonTexto,
+    secondary = CarbonCabecera,
+    onSecondary = TextoCarbon,
+    secondaryContainer = CarbonElevado,
+    onSecondaryContainer = TextoCarbon,
+    tertiary = Verde,
     onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = Carbon,
+    onBackground = TextoCarbon,
+    surface = CarbonSuperficie,
+    onSurface = TextoCarbon,
+    surfaceVariant = CarbonElevado,
+    onSurfaceVariant = TextoSuaveCarbon,
+    outline = CarbonBorde,
+    outlineVariant = CarbonBorde,
+    error = Rojo,
+    onError = Color.White,
+    errorContainer = RojoCarbonSuave,
+    onErrorContainer = RojoCarbonTexto
+)
+
+private val Formas = Shapes(
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(6.dp),
+    medium = RoundedCornerShape(8.dp),
+    large = RoundedCornerShape(8.dp),
+    extraLarge = RoundedCornerShape(8.dp)
 )
 
 @Composable
 fun CampusGPSTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = if (darkTheme) EsquemaOscuro else EsquemaClaro,
         typography = Typography,
+        shapes = Formas,
         content = content
     )
 }
