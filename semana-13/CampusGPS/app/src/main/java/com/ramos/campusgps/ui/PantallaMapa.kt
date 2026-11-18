@@ -35,7 +35,8 @@ import com.ramos.campusgps.viewmodel.MapaViewModel
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
-    val lugares by vm.lugares.collectAsState()
+    val lugares by vm.lugaresVisibles.collectAsState()
+    val categoria by vm.categoria.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
     val contexto = LocalContext.current
@@ -76,6 +77,13 @@ fun PantallaMapa(vm: MapaViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            FiltroCategorias(
+                categorias = vm.categorias,
+                seleccionada = categoria,
+                onElegir = { vm.filtrar(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
