@@ -3,6 +3,7 @@ package com.ramos.campusgps.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramos.campusgps.data.LugaresRepository
+import com.ramos.campusgps.data.PreferenciasRepository
 import com.ramos.campusgps.data.UbicacionRepository
 import com.ramos.campusgps.model.Lugar
 import com.ramos.campusgps.model.LugarConDistancia
@@ -17,13 +18,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MapaViewModel(
     private val ubicacionRepo: UbicacionRepository,
-    private val lugaresRepo: LugaresRepository
+    private val lugaresRepo: LugaresRepository,
+    private val preferenciasRepo: PreferenciasRepository
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
@@ -45,6 +48,16 @@ class MapaViewModel(
     val lugaresVisibles: StateFlow<List<LugarConDistancia>> = combine(_lugares, _categoria) { lista, cat ->
         if (cat == null) lista else lista.filter { it.lugar.categoria == cat }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _lugares.value)
+
+    val ultimoVisitado: StateFlow<Lugar?> = preferenciasRepo.ultimoLugar
+        .map { id -> lugaresRepo.obtenerLugares().firstOrNull { it.id == id } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    init {
+        viewModelScope.launch {
+            _seleccionado.value = preferenciasRepo.ultimoLugar.first()
+        }
+    }
 
     private var seguimiento: Job? = null
 
@@ -121,6 +134,9 @@ class MapaViewModel(
 
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
+        if (id != null) {
+            viewModelScope.launch { preferenciasRepo.guardarUltimoLugar(id) }
+        }
     }
 
     fun elegirRadio(metros: Int) {

@@ -47,6 +47,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
     val siguiendo by vm.siguiendo.collectAsState()
+    val ultimoVisitado by vm.ultimoVisitado.collectAsState()
     val contexto = LocalContext.current
 
     fun tienePermiso(): Boolean {
@@ -150,6 +151,8 @@ fun PantallaMapa(vm: MapaViewModel) {
                 val distancia = metros?.let { formatearDistancia(it) } ?: ""
                 Text("Más cercano: ${lugar.nombre} ($distancia)")
             }
+
+            ultimoVisitado?.let { Text("Último lugar visitado: ${it.nombre}") }
 
             when (val e = estado) {
                 UbicacionUi.Inicial -> Text("Pulsa el botón para ver tu ubicación")

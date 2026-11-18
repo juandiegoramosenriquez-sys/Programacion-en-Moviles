@@ -62,6 +62,8 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:8.4.0")
     // ViewModel para MVVM
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+    // Guarda datos pequeños en el celular (último lugar visitado)
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
