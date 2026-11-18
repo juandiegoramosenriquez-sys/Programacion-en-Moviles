@@ -10,10 +10,12 @@ import com.ramos.campusgps.model.Posicion
 import com.ramos.campusgps.model.TipoError
 import com.ramos.campusgps.model.UbicacionUi
 import com.ramos.campusgps.util.distanciaMetros
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -43,6 +45,11 @@ class MapaViewModel(
     val lugaresVisibles: StateFlow<List<LugarConDistancia>> = combine(_lugares, _categoria) { lista, cat ->
         if (cat == null) lista else lista.filter { it.lugar.categoria == cat }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _lugares.value)
+
+    private var seguimiento: Job? = null
+
+    private val _siguiendo = MutableStateFlow(false)
+    val siguiendo: StateFlow<Boolean> = _siguiendo.asStateFlow()
 
     val radios: List<Int> = listOf(100, 200, 500)
 
@@ -74,6 +81,35 @@ class MapaViewModel(
                 }
                 .onFailure { _estado.value = errorDe(it) }
         }
+    }
+
+    fun iniciarSeguimiento() {
+        if (seguimiento != null) return
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
+        _siguiendo.value = true
+        seguimiento = viewModelScope.launch {
+            ubicacionRepo.seguirPosicion()
+                .catch {
+                    _estado.value = errorDe(it)
+                    detenerSeguimiento()
+                }
+                .collect {
+                    _estado.value = UbicacionUi.Lista(it)
+                    actualizarDistancias(it)
+                }
+        }
+    }
+
+    fun detenerSeguimiento() {
+        seguimiento?.cancel()
+        seguimiento = null
+        _siguiendo.value = false
     }
 
     fun permisoDenegado() {

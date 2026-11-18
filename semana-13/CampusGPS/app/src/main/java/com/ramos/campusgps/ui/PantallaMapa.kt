@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -44,6 +46,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val dentroDelRadio by vm.dentroDelRadio.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
+    val siguiendo by vm.siguiendo.collectAsState()
     val contexto = LocalContext.current
 
     fun tienePermiso(): Boolean {
@@ -115,10 +118,27 @@ fun PantallaMapa(vm: MapaViewModel) {
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
 
-            Button(
-                onClick = { alPulsar() },
-                enabled = estado !is UbicacionUi.Buscando
-            ) { Text("Obtener mi ubicación") }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { alPulsar() },
+                    enabled = estado !is UbicacionUi.Buscando && !siguiendo
+                ) { Text("Obtener mi ubicación") }
+
+                FilledTonalButton(
+                    onClick = {
+                        when {
+                            siguiendo -> vm.detenerSeguimiento()
+                            tienePermiso() -> {
+                                permisoConcedido = true
+                                vm.iniciarSeguimiento()
+                            }
+                            else -> alPulsar()
+                        }
+                    }
+                ) { Text(if (siguiendo) "Detener" else "Iniciar") }
+            }
+
+            if (siguiendo) Text("Siguiendo tu ubicación en vivo")
 
             OutlinedButton(
                 onClick = { masCercano?.let { vm.seleccionar(it.id) } },
