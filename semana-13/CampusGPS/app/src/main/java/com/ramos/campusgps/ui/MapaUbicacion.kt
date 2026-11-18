@@ -3,12 +3,16 @@ package com.ramos.campusgps.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
+import com.ramos.campusgps.R
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
@@ -28,8 +32,12 @@ fun MapaUbicacion(
     masCercano: Lugar?,
     radio: Int,
     permisoConcedido: Boolean,
+    modoOscuro: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val contexto = LocalContext.current
+    val estiloOscuro = remember { MapStyleOptions.loadRawResourceStyle(contexto, R.raw.mapa_oscuro) }
+
     val camara = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(-12.0464, -77.0428), 12f)
     }
@@ -52,7 +60,10 @@ fun MapaUbicacion(
     GoogleMap(
         modifier = modifier,
         cameraPositionState = camara,
-        properties = MapProperties(isMyLocationEnabled = permisoConcedido),
+        properties = MapProperties(
+            isMyLocationEnabled = permisoConcedido,
+            mapStyleOptions = if (modoOscuro) estiloOscuro else null
+        ),
         uiSettings = MapUiSettings(myLocationButtonEnabled = permisoConcedido)
     ) {
         if (estado is UbicacionUi.Lista) {
