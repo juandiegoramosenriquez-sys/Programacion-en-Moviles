@@ -2,13 +2,15 @@ package com.ramos.campusgps.data
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.ramos.campusgps.model.Posicion
 import kotlinx.coroutines.tasks.await
 
-class UbicacionRepositoryGoogle(context: Context) : UbicacionRepository {
+class UbicacionRepositoryGoogle(private val context: Context) : UbicacionRepository {
 
     private val cliente = LocationServices.getFusedLocationProviderClient(context)
 
@@ -20,4 +22,8 @@ class UbicacionRepositoryGoogle(context: Context) : UbicacionRepository {
         ).await() ?: throw IllegalStateException("No se pudo obtener la ubicación")
         Posicion(ubicacion.latitude, ubicacion.longitude)
     }
+
+    override fun playServicesDisponible(): Boolean =
+        GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) ==
+            ConnectionResult.SUCCESS
 }
