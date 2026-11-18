@@ -37,6 +37,8 @@ fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugaresVisibles.collectAsState()
     val categoria by vm.categoria.collectAsState()
+    val radio by vm.radio.collectAsState()
+    val dentroDelRadio by vm.dentroDelRadio.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
     val contexto = LocalContext.current
@@ -84,11 +86,19 @@ fun PantallaMapa(vm: MapaViewModel) {
                 modifier = Modifier.fillMaxWidth()
             )
 
+            SelectorRadio(
+                radios = vm.radios,
+                seleccionado = radio,
+                onElegir = { vm.elegirRadio(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             MapaUbicacion(
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
                 masCercano = masCercano,
+                radio = radio,
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
 
@@ -121,6 +131,7 @@ fun PantallaMapa(vm: MapaViewModel) {
             ListaLugares(
                 lugares = lugares,
                 seleccionado = seleccionado,
+                dentroDelRadio = dentroDelRadio,
                 onClick = { vm.seleccionar(it) },
                 modifier = Modifier.fillMaxWidth().height(220.dp)
             )

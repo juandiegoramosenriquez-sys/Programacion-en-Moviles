@@ -29,6 +29,7 @@ import com.ramos.campusgps.util.formatearDistancia
 fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
+    dentroDelRadio: Set<Int>,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -71,6 +72,14 @@ fun ListaLugares(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        if (item.lugar.id in dentroDelRadio) {
+                            Text(
+                                "Dentro del radio",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                     Text(
                         text = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular",
