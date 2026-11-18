@@ -107,7 +107,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     Text("Latitud: ${e.posicion.latitud}")
                     Text("Longitud: ${e.posicion.longitud}")
                 }
-                is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                is UbicacionUi.Error -> MensajeError(error = e, onReintentar = { alPulsar() })
             }
 
             ListaLugares(
