@@ -4,13 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramos.campusgps.data.LugaresRepository
 import com.ramos.campusgps.data.UbicacionRepository
+import com.ramos.campusgps.model.Lugar
 import com.ramos.campusgps.model.LugarConDistancia
 import com.ramos.campusgps.model.Posicion
 import com.ramos.campusgps.model.UbicacionUi
 import com.ramos.campusgps.util.distanciaMetros
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MapaViewModel(
@@ -28,6 +32,10 @@ class MapaViewModel(
 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+
+    val masCercano: StateFlow<Lugar?> = lugares
+        .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun buscar() {
         _estado.value = UbicacionUi.Buscando
@@ -49,7 +57,6 @@ class MapaViewModel(
         _seleccionado.value = id
     }
 
-    // TODO Paso 7: val masCercano: StateFlow<Lugar?>
 
     private fun actualizarDistancias(pos: Posicion) {
         _lugares.value = lugaresRepo.obtenerLugares()
