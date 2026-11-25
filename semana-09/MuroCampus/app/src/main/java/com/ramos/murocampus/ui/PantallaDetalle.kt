@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,12 +16,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +36,38 @@ import com.ramos.murocampus.viewmodel.UiState
 fun PantallaDetalle(vm: PostsViewModel, id: Int, modifier: Modifier = Modifier) {
     val estado by vm.detalle.collectAsStateWithLifecycle()
     val borrado by vm.borrado.collectAsStateWithLifecycle()
+    val editado by vm.editado.collectAsStateWithLifecycle()
     var confirmar by remember { mutableStateOf(false) }
+    var editando by remember { mutableStateOf(false) }
+    var nuevoTitulo by rememberSaveable { mutableStateOf("") }
+
+    if (editando) {
+        AlertDialog(
+            onDismissRequest = { editando = false },
+            title = { Text("Editar título") },
+            text = {
+                OutlinedTextField(
+                    value = nuevoTitulo,
+                    onValueChange = { nuevoTitulo = it },
+                    label = { Text("Título") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        editando = false
+                        vm.editar(id, nuevoTitulo.trim())
+                    },
+                    enabled = nuevoTitulo.isNotBlank()
+                ) { Text("Guardar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { editando = false }) { Text("Cancelar") }
+            }
+        )
+    }
 
     if (confirmar) {
         AlertDialog(
@@ -79,13 +113,40 @@ fun PantallaDetalle(vm: PostsViewModel, id: Int, modifier: Modifier = Modifier) 
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(top = 8.dp)
                     )
-                    OutlinedButton(
-                        onClick = { confirmar = true },
-                        enabled = borrado !is UiState.Cargando,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.padding(top = 12.dp)
                     ) {
-                        Text(if (borrado is UiState.Cargando) "Eliminando..." else "Eliminar publicación")
+                        OutlinedButton(
+                            onClick = {
+                                nuevoTitulo = e.datos.post.title
+                                editando = true
+                            },
+                            enabled = editado !is UiState.Cargando
+                        ) {
+                            Text(if (editado is UiState.Cargando) "Guardando..." else "Editar título")
+                        }
+                        OutlinedButton(
+                            onClick = { confirmar = true },
+                            enabled = borrado !is UiState.Cargando,
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text(if (borrado is UiState.Cargando) "Eliminando..." else "Eliminar")
+                        }
+                    }
+                    when (val ed = editado) {
+                        is UiState.Exito -> Text(
+                            text = "PATCH posts/${ed.datos.id} → el servidor respondió con el título «${ed.datos.title}»",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        is UiState.Error -> Text(
+                            text = ed.mensaje,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        else -> Unit
                     }
                     val b = borrado
                     if (b is UiState.Error) {
