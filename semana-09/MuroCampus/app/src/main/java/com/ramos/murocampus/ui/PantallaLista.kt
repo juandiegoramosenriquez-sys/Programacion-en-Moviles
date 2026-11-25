@@ -1,6 +1,22 @@
 package com.ramos.murocampus.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,7 +35,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,28 +57,39 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
     val errorMas by vm.errorMas.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
-        OutlinedTextField(
+        TextField(
             value = busqueda,
             onValueChange = { vm.buscar(it) },
             placeholder = { Text("Buscar por título") },
             singleLine = true,
+            shape = CircleShape,
+            leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
             trailingIcon = {
                 if (busqueda.isNotEmpty()) {
-                    TextButton(onClick = { vm.buscar("") }) { Text("Limpiar") }
+                    IconButton(onClick = { vm.buscar("") }) {
+                        Icon(Icons.Outlined.Close, contentDescription = "Limpiar búsqueda")
+                    }
                 }
             },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 4.dp)
         )
 
         FiltroUsuarios(seleccionado = filtro, onElegir = { vm.filtrar(it) })
 
         if (sinConexion && estado is UiState.Exito) {
             Card(
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -73,12 +99,17 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(start = 16.dp, end = 4.dp)
                 ) {
+                    Icon(Icons.Outlined.CloudOff, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Sin conexión. Mostrando publicaciones guardadas.",
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f)
                     )
-                    TextButton(onClick = { vm.cargar() }) { Text("Reintentar") }
+                    TextButton(
+                        onClick = { vm.cargar() },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onTertiaryContainer)
+                    ) { Text("Reintentar", fontWeight = FontWeight.Bold) }
                 }
             }
         }
@@ -107,6 +138,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                 ) {
                     items(e.datos, key = { it.id }) { post ->
                         TarjetaPost(
+                            id = post.id,
                             userId = post.userId,
                             titulo = post.title,
                             cuerpo = post.body,
@@ -159,6 +191,7 @@ private fun PieDeLista(
             OutlinedButton(
                 onClick = onCargarMas,
                 enabled = !cargandoMas,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 if (cargandoMas) {
@@ -185,6 +218,7 @@ private fun FiltroUsuarios(seleccionado: Int?, onElegir: (Int?) -> Unit) {
                 selected = seleccionado == userId,
                 onClick = { onElegir(userId) },
                 label = { Text(if (userId == null) "Todos" else "Usuario $userId") },
+                shape = CircleShape,
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primary,
                     selectedLabelColor = MaterialTheme.colorScheme.onPrimary

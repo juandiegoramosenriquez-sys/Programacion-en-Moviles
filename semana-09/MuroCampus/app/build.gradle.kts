@@ -81,6 +81,12 @@ dependencies {
     // Compilador de Room: genera el DAO y la base de datos
     ksp("androidx.room:room-compiler:2.8.5")
 
+    // DataStore: recuerda si el usuario eligio modo claro u oscuro
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
+    // Iconos de Material: buscar, editar, eliminar, sol y luna
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
