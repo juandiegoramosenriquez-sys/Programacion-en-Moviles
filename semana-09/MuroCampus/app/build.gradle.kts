@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+
+    // Serializacion: convierte el JSON en data class (misma version que Kotlin)
+    kotlin("plugin.serialization") version "2.2.10"
 }
 
 android {
@@ -47,6 +50,24 @@ dependencies {
 
     // ViewModel y viewModelScope: corrutinas que no bloquean la pantalla
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    // Retrofit: convierte una interface en llamadas HTTP
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+
+    // Conversor de Retrofit que usa kotlinx.serialization para leer el JSON
+    implementation("com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0")
+
+    // kotlinx.serialization: pasa de JSON a data class y al reves
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+
+    // OkHttp: hace la conexion HTTP real
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // Logging de OkHttp: muestra en Logcat las peticiones y el JSON
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // collectAsStateWithLifecycle: la pantalla observa el StateFlow del ViewModel
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
