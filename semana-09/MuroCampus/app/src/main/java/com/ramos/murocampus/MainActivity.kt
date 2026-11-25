@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.ramos.murocampus.ui.PantallaCrear
 import com.ramos.murocampus.ui.PantallaDetalle
 import com.ramos.murocampus.ui.PantallaLista
 import com.ramos.murocampus.ui.theme.MuroCampusTheme
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MuroCampusTheme {
                 var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+                var creando by rememberSaveable { mutableStateOf(false) }
 
                 Scaffold(
                     topBar = {
@@ -46,14 +49,36 @@ class MainActivity : ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         )
+                    },
+                    floatingActionButton = {
+                        if (idSeleccionado == null && !creando) {
+                            FloatingActionButton(
+                                onClick = {
+                                    vm.reiniciarCreacion()
+                                    creando = true
+                                },
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            ) {
+                                Text("+", style = MaterialTheme.typography.headlineMedium)
+                            }
+                        }
                     }
                 ) { padding ->
                     val contenido = Modifier
                         .fillMaxSize()
                         .padding(padding)
                     val id = idSeleccionado
-                    if (id == null) {
-                        PantallaLista(
+                    when {
+                        creando -> {
+                            BackHandler { creando = false }
+                            PantallaCrear(vm = vm, modifier = contenido)
+                        }
+                        id != null -> {
+                            BackHandler { idSeleccionado = null }
+                            PantallaDetalle(vm = vm, id = id, modifier = contenido)
+                        }
+                        else -> PantallaLista(
                             vm = vm,
                             onAbrir = {
                                 idSeleccionado = it
@@ -61,9 +86,6 @@ class MainActivity : ComponentActivity() {
                             },
                             modifier = contenido
                         )
-                    } else {
-                        BackHandler { idSeleccionado = null }
-                        PantallaDetalle(vm = vm, id = id, modifier = contenido)
                     }
                 }
             }

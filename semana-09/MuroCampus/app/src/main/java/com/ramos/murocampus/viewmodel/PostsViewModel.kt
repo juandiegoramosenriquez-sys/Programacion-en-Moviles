@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ramos.murocampus.data.PostRepository
 import com.ramos.murocampus.model.Comentario
+import com.ramos.murocampus.model.NuevoPost
 import com.ramos.murocampus.model.Post
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -25,6 +26,9 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
     private val _usuarioFiltro = MutableStateFlow<Int?>(null)
     val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
+
+    private val _creado = MutableStateFlow<UiState<Post>?>(null)
+    val creado: StateFlow<UiState<Post>?> = _creado.asStateFlow()
 
     private var trabajoLista: Job? = null
     private var trabajoDetalle: Job? = null
@@ -48,6 +52,19 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     fun filtrar(userId: Int?) {
         _usuarioFiltro.value = userId
         cargar()
+    }
+
+    fun publicar(titulo: String, texto: String) {
+        viewModelScope.launch {
+            _creado.value = UiState.Cargando
+            repo.crear(NuevoPost(userId = 1, title = titulo, body = texto))
+                .onSuccess { _creado.value = UiState.Exito(it) }
+                .onFailure { _creado.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    fun reiniciarCreacion() {
+        _creado.value = null
     }
 
     fun abrir(id: Int) {
