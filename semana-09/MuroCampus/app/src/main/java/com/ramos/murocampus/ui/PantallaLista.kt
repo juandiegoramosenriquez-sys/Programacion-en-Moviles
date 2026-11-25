@@ -15,7 +15,7 @@ import com.ramos.murocampus.viewmodel.PostsViewModel
 import com.ramos.murocampus.viewmodel.UiState
 
 @Composable
-fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
+fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier = Modifier) {
     val estado by vm.lista.collectAsStateWithLifecycle()
 
     when (val e = estado) {
@@ -33,7 +33,7 @@ fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
                     userId = post.userId,
                     titulo = post.title,
                     cuerpo = post.body,
-                    onClick = {}
+                    onClick = { onAbrir(post.id) }
                 )
             }
         }
