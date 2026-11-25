@@ -6,6 +6,7 @@ import com.ramos.murocampus.data.PostRepository
 import com.ramos.murocampus.model.Comentario
 import com.ramos.murocampus.model.NuevoPost
 import com.ramos.murocampus.model.Post
+import com.ramos.murocampus.model.Usuario
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -68,11 +69,22 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private var trabajoLista: Job? = null
     private var trabajoDetalle: Job? = null
 
+    private val _autores = MutableStateFlow<Map<Int, Usuario>>(emptyMap())
+    val autores: StateFlow<Map<Int, Usuario>> = _autores.asStateFlow()
+
     init {
         cargar()
     }
 
+    private fun cargarAutores() {
+        if (_autores.value.isNotEmpty()) return
+        viewModelScope.launch {
+            repo.usuarios().onSuccess { lista -> _autores.value = lista.associateBy { it.id } }
+        }
+    }
+
     fun cargar() {
+        cargarAutores()
         val userId = _usuarioFiltro.value
         trabajoLista?.cancel()
         _cargandoMas.value = false

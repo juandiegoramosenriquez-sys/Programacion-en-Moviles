@@ -2,6 +2,9 @@ package com.ramos.murocampus.data
 
 import com.ramos.murocampus.data.local.PostDao
 import com.ramos.murocampus.data.local.PostEntity
+import com.ramos.murocampus.data.local.UsuarioDao
+import com.ramos.murocampus.data.local.aUsuario
+import com.ramos.murocampus.model.Usuario
 import com.ramos.murocampus.data.local.aEntity
 import com.ramos.murocampus.data.local.aPost
 import com.ramos.murocampus.data.remote.PostApi
@@ -22,12 +25,29 @@ interface PostRepository {
     suspend fun crear(nuevo: NuevoPost): Result<Post>
     suspend fun editar(id: Int, titulo: String): Result<Post>
     suspend fun borrar(id: Int): Result<Unit>
+    suspend fun usuarios(): Result<List<Usuario>>
 }
 
 class PostRepositoryRemote(
     private val api: PostApi,
-    private val dao: PostDao
+    private val dao: PostDao,
+    private val usuarioDao: UsuarioDao
 ) : PostRepository {
+
+    override suspend fun usuarios(): Result<List<Usuario>> {
+        val red = llamar { api.usuarios() }
+        val usuarios = red.getOrNull()
+        if (usuarios != null) {
+            llamar { usuarioDao.guardar(usuarios.map { it.aEntity() }) }
+            return Result.success(usuarios)
+        }
+        val guardados = llamar { usuarioDao.todos() }.getOrDefault(emptyList())
+        return if (guardados.isNotEmpty()) {
+            Result.success(guardados.map { it.aUsuario() })
+        } else {
+            Result.failure(red.exceptionOrNull() ?: IllegalStateException("Sin usuarios"))
+        }
+    }
 
     override suspend fun listar(): Result<Listado> =
         conCache(remoto = { api.listar() }, local = { dao.todos() })

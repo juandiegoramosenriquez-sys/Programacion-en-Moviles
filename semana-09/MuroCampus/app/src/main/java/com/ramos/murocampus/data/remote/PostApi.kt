@@ -4,6 +4,7 @@ import com.ramos.murocampus.model.Comentario
 import com.ramos.murocampus.model.EdicionPost
 import com.ramos.murocampus.model.NuevoPost
 import com.ramos.murocampus.model.Post
+import com.ramos.murocampus.model.Usuario
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -38,4 +39,7 @@ interface PostApi {
 
     @DELETE("posts/{id}")
     suspend fun borrar(@Path("id") id: Int): Response<Unit>
+
+    @GET("users")
+    suspend fun usuarios(): List<Usuario>
 }

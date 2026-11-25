@@ -48,6 +48,7 @@ fun PantallaDetalle(
     val estado by vm.detalle.collectAsStateWithLifecycle()
     val borrado by vm.borrado.collectAsStateWithLifecycle()
     val editado by vm.editado.collectAsStateWithLifecycle()
+    val autores by vm.autores.collectAsStateWithLifecycle()
     var nuevoTitulo by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(editando) {
@@ -87,7 +88,7 @@ fun PantallaDetalle(
         AlertDialog(
             onDismissRequest = onCerrarBorrado,
             title = { Text("¿Eliminar publicación?") },
-            text = { Text("Se enviará DELETE posts/$id al servidor.") },
+            text = { Text("La publicación dejará de aparecer en el muro. Esta acción no se puede deshacer.") },
             confirmButton = {
                 TextButton(onClick = {
                     onCerrarBorrado()
@@ -122,25 +123,36 @@ fun PantallaDetalle(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            val autor = nombreAutor(e.datos.post.userId, autores)
                             AvatarUsuario(
-                                userId = e.datos.post.userId,
+                                iniciales = iniciales(autor),
                                 fondo = MaterialTheme.colorScheme.tertiaryContainer,
                                 texto = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                             Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = "Usuario ${e.datos.post.userId} · Publicación #${e.datos.post.id}",
-                                style = MaterialTheme.typography.labelLarge
-                            )
+                            Column {
+                                Text(
+                                    text = autor,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                val usuario = autores[e.datos.post.userId]
+                                if (usuario != null) {
+                                    Text(
+                                        text = "@${usuario.username} · ${usuario.email.lowercase()}",
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
+                            }
                         }
                         Text(
-                            text = e.datos.post.title,
+                            text = e.datos.post.title.comoTitulo(),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(top = 14.dp)
                         )
                         Text(
-                            text = e.datos.post.body,
+                            text = e.datos.post.body.comoParrafo(),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(top = 8.dp)
                         )
@@ -170,16 +182,24 @@ fun PantallaDetalle(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AvatarUsuario(
+                                iniciales = comentario.email.first().uppercase(),
+                                fondo = MaterialTheme.colorScheme.secondaryContainer,
+                                texto = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = comentario.email.lowercase(),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         Text(
-                            text = comentario.email,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = comentario.body,
+                            text = comentario.body.comoParrafo(),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(top = 8.dp)
                         )
                     }
                 }

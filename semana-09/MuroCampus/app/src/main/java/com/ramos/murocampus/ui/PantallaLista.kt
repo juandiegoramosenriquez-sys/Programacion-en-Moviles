@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ramos.murocampus.model.Usuario
 import com.ramos.murocampus.viewmodel.PostsViewModel
 import com.ramos.murocampus.viewmodel.UiState
 
@@ -55,6 +56,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
     val hayMas by vm.hayMas.collectAsStateWithLifecycle()
     val cargandoMas by vm.cargandoMas.collectAsStateWithLifecycle()
     val errorMas by vm.errorMas.collectAsStateWithLifecycle()
+    val autores by vm.autores.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         TextField(
@@ -82,7 +84,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 4.dp)
         )
 
-        FiltroUsuarios(seleccionado = filtro, onElegir = { vm.filtrar(it) })
+        FiltroUsuarios(seleccionado = filtro, autores = autores, onElegir = { vm.filtrar(it) })
 
         if (sinConexion && estado is UiState.Exito) {
             Card(
@@ -138,10 +140,10 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                 ) {
                     items(e.datos, key = { it.id }) { post ->
                         TarjetaPost(
-                            id = post.id,
-                            userId = post.userId,
-                            titulo = post.title,
-                            cuerpo = post.body,
+                            autor = nombreAutor(post.userId, autores),
+                            usuario = autores[post.userId]?.username.orEmpty(),
+                            titulo = post.title.comoTitulo(),
+                            cuerpo = post.body.comoParrafo(),
                             onClick = { onAbrir(post.id) }
                         )
                     }
@@ -205,7 +207,7 @@ private fun PieDeLista(
 }
 
 @Composable
-private fun FiltroUsuarios(seleccionado: Int?, onElegir: (Int?) -> Unit) {
+private fun FiltroUsuarios(seleccionado: Int?, autores: Map<Int, Usuario>, onElegir: (Int?) -> Unit) {
     val opciones: List<Int?> = listOf(null) + (1..10).toList()
 
     LazyRow(
@@ -217,7 +219,7 @@ private fun FiltroUsuarios(seleccionado: Int?, onElegir: (Int?) -> Unit) {
             FilterChip(
                 selected = seleccionado == userId,
                 onClick = { onElegir(userId) },
-                label = { Text(if (userId == null) "Todos" else "Usuario $userId") },
+                label = { Text(if (userId == null) "Todos" else nombreCorto(userId, autores)) },
                 shape = CircleShape,
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = MaterialTheme.colorScheme.primary,

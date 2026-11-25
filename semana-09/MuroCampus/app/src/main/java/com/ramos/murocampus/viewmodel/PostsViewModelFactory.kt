@@ -14,7 +14,7 @@ class PostsViewModelFactory(private val context: Context) : ViewModelProvider.Fa
         if (modelClass.isAssignableFrom(TemaViewModel::class.java)) {
             return TemaViewModel(PreferenciasTema(context)) as T
         }
-        val dao = MuroDatabase.obtener(context).postDao()
-        return PostsViewModel(PostRepositoryRemote(RetrofitClient.api, dao)) as T
+        val base = MuroDatabase.obtener(context)
+        return PostsViewModel(PostRepositoryRemote(RetrofitClient.api, base.postDao(), base.usuarioDao())) as T
     }
 }

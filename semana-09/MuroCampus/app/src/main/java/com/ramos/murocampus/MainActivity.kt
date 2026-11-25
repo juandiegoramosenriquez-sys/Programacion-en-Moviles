@@ -87,14 +87,14 @@ class MainActivity : ComponentActivity() {
                     if (b is UiState.Exito) {
                         idSeleccionado = null
                         vm.reiniciarBorrado()
-                        avisos.showSnackbar("Publicación ${b.datos} eliminada")
+                        avisos.showSnackbar("Publicación eliminada")
                     }
                 }
 
                 LaunchedEffect(editado) {
                     val ed = editado
                     if (ed is UiState.Exito) {
-                        avisos.showSnackbar("PATCH posts/${ed.datos.id}: título «${ed.datos.title}»")
+                        avisos.showSnackbar("Título actualizado")
                     }
                 }
 

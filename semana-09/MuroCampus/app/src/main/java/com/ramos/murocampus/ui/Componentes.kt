@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun AvatarUsuario(
-    userId: Int,
+    iniciales: String,
     modifier: Modifier = Modifier,
     fondo: Color = MaterialTheme.colorScheme.primary,
     texto: Color = MaterialTheme.colorScheme.onPrimary
@@ -49,8 +49,9 @@ fun AvatarUsuario(
             .background(fondo)
     ) {
         Text(
-            text = "U$userId",
+            text = iniciales,
             style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
             color = texto
         )
     }
@@ -58,8 +59,8 @@ fun AvatarUsuario(
 
 @Composable
 fun TarjetaPost(
-    id: Int,
-    userId: Int,
+    autor: String,
+    usuario: String,
     titulo: String,
     cuerpo: String,
     onClick: () -> Unit,
@@ -74,20 +75,23 @@ fun TarjetaPost(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AvatarUsuario(userId)
+                AvatarUsuario(iniciales(autor))
                 Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = "Usuario $userId",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                Text(
-                    text = "#$id",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
+                Column {
+                    Text(
+                        text = autor,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    if (usuario.isNotBlank()) {
+                        Text(
+                            text = "@$usuario",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(10.dp))
             Text(

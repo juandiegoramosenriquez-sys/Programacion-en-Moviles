@@ -12,7 +12,11 @@ sealed interface UiState<out T> {
 
 fun mensajeDe(e: Throwable): String = when (e) {
     is IOException -> "Sin conexión a internet.\nRevisa tu red e inténtalo otra vez."
-    is HttpException -> "Error del servidor (${e.code()})"
-    is SerializationException -> "Respuesta inesperada"
-    else -> "Error desconocido"
+    is HttpException -> if (e.code() == 404) {
+        "No encontramos esta publicación.\nPuede que ya no esté disponible."
+    } else {
+        "El servidor no está respondiendo bien.\nInténtalo de nuevo en unos minutos."
+    }
+    is SerializationException -> "No pudimos leer la información recibida.\nInténtalo de nuevo más tarde."
+    else -> "Algo salió mal.\nInténtalo de nuevo."
 }

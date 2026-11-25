@@ -5,10 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [PostEntity::class], version = 1, exportSchema = false)
+@Database(entities = [PostEntity::class, UsuarioEntity::class], version = 2, exportSchema = false)
 abstract class MuroDatabase : RoomDatabase() {
 
     abstract fun postDao(): PostDao
+
+    abstract fun usuarioDao(): UsuarioDao
 
     companion object {
         @Volatile
@@ -20,7 +22,9 @@ abstract class MuroDatabase : RoomDatabase() {
                     context.applicationContext,
                     MuroDatabase::class.java,
                     "murocampus.db"
-                ).build().also { instancia = it }
+                ).fallbackToDestructiveMigration(true)
+                    .build()
+                    .also { instancia = it }
             }
     }
 }

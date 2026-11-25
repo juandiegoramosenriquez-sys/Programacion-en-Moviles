@@ -98,7 +98,7 @@ fun PantallaCrear(vm: PostsViewModel, modifier: Modifier = Modifier) {
 
         when (val e = estado) {
             is UiState.Exito -> Aviso(
-                texto = "Publicado con id ${e.datos.id}",
+                texto = "¡Listo! Tu publicación se compartió en el muro.",
                 exito = true
             )
             is UiState.Error -> Aviso(texto = e.mensaje, exito = false)
