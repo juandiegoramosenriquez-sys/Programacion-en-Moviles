@@ -30,9 +30,16 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
 
-    val lista: StateFlow<UiState<List<Post>>> = combine(_lista, _busqueda) { estado, texto ->
-        if (estado is UiState.Exito && texto.isNotBlank()) {
-            UiState.Exito(estado.datos.filter { it.title.contains(texto.trim(), ignoreCase = true) })
+    private val _soloMias = MutableStateFlow(false)
+    val soloMias: StateFlow<Boolean> = _soloMias.asStateFlow()
+
+    val lista: StateFlow<UiState<List<Post>>> = combine(_lista, _busqueda, _soloMias) { estado, texto, mias ->
+        if (estado is UiState.Exito) {
+            UiState.Exito(
+                estado.datos
+                    .filter { !mias || it.propio }
+                    .filter { texto.isBlank() || it.title.contains(texto.trim(), ignoreCase = true) }
+            )
         } else {
             estado
         }
@@ -40,6 +47,12 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
     fun buscar(texto: String) {
         _busqueda.value = texto
+    }
+
+    fun verSoloMias(mias: Boolean) {
+        _soloMias.value = mias
+        _busqueda.value = ""
+        if (_usuarioFiltro.value != null) filtrar(null)
     }
 
     private val _detalle = MutableStateFlow<UiState<DetalleUi>>(UiState.Cargando)

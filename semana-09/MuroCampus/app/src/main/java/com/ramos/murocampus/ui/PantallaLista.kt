@@ -9,7 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.ButtonDefaults
@@ -59,6 +61,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
     val cargandoMas by vm.cargandoMas.collectAsStateWithLifecycle()
     val errorMas by vm.errorMas.collectAsStateWithLifecycle()
     val autores by vm.autores.collectAsStateWithLifecycle()
+    val soloMias by vm.soloMias.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         TextField(
@@ -86,7 +89,11 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                 .padding(start = 16.dp, end = 16.dp, top = 4.dp)
         )
 
-        FiltroUsuarios(seleccionado = filtro, autores = autores, onElegir = { vm.filtrar(it) })
+        if (!soloMias) {
+            FiltroUsuarios(seleccionado = filtro, autores = autores, onElegir = { vm.filtrar(it) })
+        } else {
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
         if (sinConexion && estado is UiState.Exito) {
             Card(
@@ -128,7 +135,14 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                 ErrorConReintento(e.mensaje, onReintentar = { vm.cargar() })
             }
             is UiState.Exito -> if (e.datos.isEmpty()) {
-                if (busqueda.isNotBlank()) {
+                if (soloMias && busqueda.isBlank()) {
+                    EstadoVacio(
+                        icono = Icons.Outlined.EditNote,
+                        titulo = "Aún no publicaste nada",
+                        detalle = "Toca «Nueva» para compartir algo con tu campus.",
+                        modifier = contenido
+                    )
+                } else if (busqueda.isNotBlank()) {
                     EstadoVacio(
                         icono = Icons.Outlined.SearchOff,
                         titulo = "Sin resultados",
@@ -151,7 +165,11 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                 ) {
                     item {
                         Text(
-                            text = if (filtro == null) "Últimas publicaciones" else "Publicaciones de ${nombreAutor(filtro!!, autores)}",
+                            text = when {
+                                soloMias -> "Mis publicaciones"
+                                filtro == null -> "Últimas publicaciones"
+                                else -> "Publicaciones de ${nombreAutor(filtro!!, autores)}"
+                            },
                             style = MaterialTheme.typography.titleSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 4.dp)
@@ -170,7 +188,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                     item {
                         PieDeLista(
                             mostrando = e.datos.size,
-                            hayMas = hayMas && busqueda.isBlank(),
+                            hayMas = hayMas && busqueda.isBlank() && !soloMias,
                             cargandoMas = cargandoMas,
                             errorMas = errorMas,
                             onCargarMas = { vm.cargarMas() }
