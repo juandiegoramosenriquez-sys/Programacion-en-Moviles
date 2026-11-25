@@ -4,6 +4,9 @@ plugins {
 
     // Serializacion: convierte el JSON en data class (misma version que Kotlin)
     kotlin("plugin.serialization") version "2.2.10"
+
+    // KSP: genera el codigo de Room a partir de las anotaciones
+    id("com.google.devtools.ksp") version "2.3.12"
 }
 
 android {
@@ -68,6 +71,15 @@ dependencies {
 
     // collectAsStateWithLifecycle: la pantalla observa el StateFlow del ViewModel
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+
+    // Room: base de datos local para ver las publicaciones sin internet
+    implementation("androidx.room:room-runtime:2.8.5")
+
+    // Room con corrutinas: funciones suspend en el DAO
+    implementation("androidx.room:room-ktx:2.8.5")
+
+    // Compilador de Room: genera el DAO y la base de datos
+    ksp("androidx.room:room-compiler:2.8.5")
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

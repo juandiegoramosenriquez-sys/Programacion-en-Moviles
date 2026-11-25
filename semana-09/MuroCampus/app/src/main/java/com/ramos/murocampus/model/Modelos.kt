@@ -26,6 +26,11 @@ data class Comentario(
     val body: String
 )
 
+data class Listado(
+    val posts: List<Post>,
+    val desdeCache: Boolean
+)
+
 @Serializable
 data class EdicionPost(
     val title: String

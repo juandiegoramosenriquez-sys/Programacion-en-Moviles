@@ -23,6 +23,9 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
 
     private val _lista = MutableStateFlow<UiState<List<Post>>>(UiState.Cargando)
 
+    private val _sinConexion = MutableStateFlow(false)
+    val sinConexion: StateFlow<Boolean> = _sinConexion.asStateFlow()
+
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
 
@@ -67,8 +70,14 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             _lista.value = UiState.Cargando
             val resultado = if (userId == null) repo.listar() else repo.porUsuario(userId)
             resultado
-                .onSuccess { _lista.value = UiState.Exito(it) }
-                .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
+                .onSuccess {
+                    _lista.value = UiState.Exito(it.posts)
+                    _sinConexion.value = it.desdeCache
+                }
+                .onFailure {
+                    _lista.value = UiState.Error(mensajeDe(it))
+                    _sinConexion.value = false
+                }
         }
     }
 

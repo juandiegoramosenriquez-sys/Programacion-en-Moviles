@@ -35,7 +35,7 @@ import com.ramos.murocampus.viewmodel.UiState
 
 class MainActivity : ComponentActivity() {
 
-    private val vm: PostsViewModel by viewModels { PostsViewModelFactory() }
+    private val vm: PostsViewModel by viewModels { PostsViewModelFactory(applicationContext) }
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {

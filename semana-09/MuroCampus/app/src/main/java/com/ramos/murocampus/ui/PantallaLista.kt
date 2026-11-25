@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +32,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
     val estado by vm.lista.collectAsStateWithLifecycle()
     val filtro by vm.usuarioFiltro.collectAsStateWithLifecycle()
     val busqueda by vm.busqueda.collectAsStateWithLifecycle()
+    val sinConexion by vm.sinConexion.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         OutlinedTextField(
@@ -47,6 +51,30 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
         )
 
         FiltroUsuarios(seleccionado = filtro, onElegir = { vm.filtrar(it) })
+
+        if (sinConexion && estado is UiState.Exito) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 16.dp, end = 4.dp)
+                ) {
+                    Text(
+                        text = "Sin conexión. Mostrando publicaciones guardadas.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = { vm.cargar() }) { Text("Reintentar") }
+                }
+            }
+        }
 
         val contenido = Modifier
             .fillMaxWidth()
