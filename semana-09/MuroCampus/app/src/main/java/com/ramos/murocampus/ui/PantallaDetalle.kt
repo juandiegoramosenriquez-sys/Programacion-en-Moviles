@@ -1,6 +1,9 @@
 package com.ramos.murocampus.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -123,33 +126,32 @@ fun PantallaDetalle(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            val autor = nombreAutor(e.datos.post.userId, autores)
+                            val propio = e.datos.post.propio
+                            val autor = if (propio) "Tú" else nombreAutor(e.datos.post.userId, autores)
                             AvatarUsuario(
                                 iniciales = iniciales(autor),
                                 fondo = MaterialTheme.colorScheme.tertiaryContainer,
                                 texto = MaterialTheme.colorScheme.onTertiaryContainer
                             )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Column {
-                                Text(
-                                    text = autor,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold
-                                )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = autor, style = MaterialTheme.typography.titleSmall)
                                 val usuario = autores[e.datos.post.userId]
-                                if (usuario != null) {
-                                    Text(
-                                        text = "@${usuario.username} · ${usuario.email.lowercase()}",
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
+                                Text(
+                                    text = when {
+                                        propio -> "Publicado desde este celular"
+                                        usuario != null -> "@${usuario.username} · ${usuario.email.lowercase()}"
+                                        else -> ""
+                                    },
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
+                            if (propio) Insignia("Tuya")
                         }
                         Text(
                             text = e.datos.post.title.comoTitulo(),
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 14.dp)
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(top = 16.dp)
                         )
                         Text(
                             text = e.datos.post.body.comoParrafo(),
@@ -171,20 +173,30 @@ fun PantallaDetalle(
                 Text(
                     text = "Comentarios · ${e.datos.comentarios.size}",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(top = 8.dp)
                 )
+            }
+            if (e.datos.comentarios.isEmpty()) {
+                item {
+                    EstadoVacio(
+                        icono = Icons.Outlined.ChatBubbleOutline,
+                        titulo = "Aún no hay comentarios",
+                        detalle = "Cuando alguien comente tu publicación, aparecerá aquí."
+                    )
+                }
             }
             items(e.datos.comentarios, key = { it.id }) { comentario ->
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                    border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             AvatarUsuario(
                                 iniciales = comentario.email.first().uppercase(),
+                                tamano = 28.dp,
                                 fondo = MaterialTheme.colorScheme.secondaryContainer,
                                 texto = MaterialTheme.colorScheme.onSecondaryContainer
                             )

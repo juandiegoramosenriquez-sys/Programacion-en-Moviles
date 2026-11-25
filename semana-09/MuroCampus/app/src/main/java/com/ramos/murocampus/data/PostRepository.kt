@@ -3,16 +3,16 @@ package com.ramos.murocampus.data
 import com.ramos.murocampus.data.local.PostDao
 import com.ramos.murocampus.data.local.PostEntity
 import com.ramos.murocampus.data.local.UsuarioDao
-import com.ramos.murocampus.data.local.aUsuario
-import com.ramos.murocampus.model.Usuario
 import com.ramos.murocampus.data.local.aEntity
 import com.ramos.murocampus.data.local.aPost
+import com.ramos.murocampus.data.local.aUsuario
 import com.ramos.murocampus.data.remote.PostApi
 import com.ramos.murocampus.model.Comentario
 import com.ramos.murocampus.model.EdicionPost
 import com.ramos.murocampus.model.Listado
 import com.ramos.murocampus.model.NuevoPost
 import com.ramos.murocampus.model.Post
+import com.ramos.murocampus.model.Usuario
 import retrofit2.HttpException
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -26,6 +26,7 @@ interface PostRepository {
     suspend fun editar(id: Int, titulo: String): Result<Post>
     suspend fun borrar(id: Int): Result<Unit>
     suspend fun usuarios(): Result<List<Usuario>>
+    suspend fun usuariosGuardados(): List<Usuario>
 }
 
 class PostRepositoryRemote(
@@ -33,6 +34,9 @@ class PostRepositoryRemote(
     private val dao: PostDao,
     private val usuarioDao: UsuarioDao
 ) : PostRepository {
+
+    override suspend fun usuariosGuardados(): List<Usuario> =
+        llamar { usuarioDao.todos() }.getOrDefault(emptyList()).map { it.aUsuario() }
 
     override suspend fun usuarios(): Result<List<Usuario>> {
         val red = llamar { api.usuarios() }
@@ -50,29 +54,84 @@ class PostRepositoryRemote(
     }
 
     override suspend fun listar(): Result<Listado> =
-        conCache(remoto = { api.listar() }, local = { dao.todos() })
+        conPropios(
+            listado = conCache(remoto = { api.listar() }, local = { dao.todos() }),
+            propios = { dao.propios() }
+        )
 
-    override suspend fun pagina(inicio: Int, cantidad: Int): Result<Listado> =
-        conCache(
+    override suspend fun pagina(inicio: Int, cantidad: Int): Result<Listado> {
+        val listado = conCache(
             remoto = { api.pagina(inicio, cantidad) },
             local = { if (inicio == 0) dao.todos() else emptyList() }
         )
-
-    override suspend fun detalle(id: Int): Result<Post> = llamar { api.detalle(id) }
-
-    override suspend fun comentarios(id: Int): Result<List<Comentario>> = llamar { api.comentarios(id) }
+        return if (inicio == 0) conPropios(listado, propios = { dao.propios() }) else listado
+    }
 
     override suspend fun porUsuario(userId: Int): Result<Listado> =
-        conCache(remoto = { api.porUsuario(userId) }, local = { dao.porUsuario(userId) })
+        conPropios(
+            listado = conCache(remoto = { api.porUsuario(userId) }, local = { dao.porUsuario(userId) }),
+            propios = { dao.propiosDe(userId) }
+        )
 
-    override suspend fun crear(nuevo: NuevoPost): Result<Post> = llamar { api.crear(nuevo) }
+    override suspend fun detalle(id: Int): Result<Post> {
+        val local = llamar { dao.porId(id) }.getOrNull()
+        if (local != null && local.propio) return Result.success(local.aPost())
+        return llamar { api.detalle(id) }
+    }
 
-    override suspend fun editar(id: Int, titulo: String): Result<Post> =
-        llamar { api.editar(id, EdicionPost(title = titulo)) }
+    override suspend fun comentarios(id: Int): Result<List<Comentario>> {
+        val local = llamar { dao.porId(id) }.getOrNull()
+        if (local != null && local.propio) return Result.success(emptyList())
+        return llamar { api.comentarios(id) }
+    }
+
+    override suspend fun crear(nuevo: NuevoPost): Result<Post> = llamar {
+        val respuesta = api.crear(nuevo)
+        val idLocal = maxOf((dao.mayorId() ?: 0) + 1, respuesta.id)
+        val propio = Post(
+            userId = nuevo.userId,
+            id = idLocal,
+            title = respuesta.title,
+            body = respuesta.body,
+            propio = true
+        )
+        dao.guardar(listOf(propio.aEntity()))
+        propio
+    }
+
+    override suspend fun editar(id: Int, titulo: String): Result<Post> = llamar {
+        val local = dao.porId(id)
+        if (local != null && local.propio) {
+            dao.cambiarTitulo(id, titulo)
+            local.aPost().copy(title = titulo)
+        } else {
+            val respuesta = api.editar(id, EdicionPost(title = titulo))
+            dao.cambiarTitulo(id, respuesta.title)
+            respuesta
+        }
+    }
 
     override suspend fun borrar(id: Int): Result<Unit> = llamar {
-        val respuesta = api.borrar(id)
-        if (!respuesta.isSuccessful) throw HttpException(respuesta)
+        val local = dao.porId(id)
+        if (local == null || !local.propio) {
+            val respuesta = api.borrar(id)
+            if (!respuesta.isSuccessful) throw HttpException(respuesta)
+        }
+        dao.borrar(id)
+    }
+
+    private suspend fun conPropios(
+        listado: Result<Listado>,
+        propios: suspend () -> List<PostEntity>
+    ): Result<Listado> {
+        val mios = llamar { propios() }.getOrDefault(emptyList()).map { it.aPost() }
+        if (mios.isEmpty()) return listado
+        val datos = listado.getOrNull()
+        return if (datos != null) {
+            Result.success(datos.copy(posts = mios + datos.posts))
+        } else {
+            Result.success(Listado(mios, desdeCache = true))
+        }
     }
 
     private suspend fun conCache(

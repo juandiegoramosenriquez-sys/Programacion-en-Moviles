@@ -1,6 +1,7 @@
 package com.ramos.murocampus.model
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class Usuario(
@@ -15,7 +16,8 @@ data class Post(
     val userId: Int,
     val id: Int,
     val title: String,
-    val body: String
+    val body: String,
+    @Transient val propio: Boolean = false
 )
 
 @Serializable

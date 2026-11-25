@@ -9,7 +9,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.SearchOff
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -111,7 +113,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                     TextButton(
                         onClick = { vm.cargar() },
                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onTertiaryContainer)
-                    ) { Text("Reintentar", fontWeight = FontWeight.Bold) }
+                    ) { Text("Reintentar", fontWeight = FontWeight.SemiBold) }
                 }
             }
         }
@@ -121,29 +123,47 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
             .weight(1f)
 
         when (val e = estado) {
-            is UiState.Cargando -> Cargando("Cargando publicaciones...", contenido)
-            is UiState.Error -> Box(modifier = contenido) {
+            is UiState.Cargando -> ListaEsqueleto(contenido)
+            is UiState.Error -> Box(modifier = contenido, contentAlignment = Alignment.Center) {
                 ErrorConReintento(e.mensaje, onReintentar = { vm.cargar() })
             }
             is UiState.Exito -> if (e.datos.isEmpty()) {
-                Box(modifier = contenido, contentAlignment = Alignment.Center) {
-                    Text(
-                        if (busqueda.isNotBlank()) "Ninguna publicación coincide con «${busqueda.trim()}»"
-                        else "Sin publicaciones"
+                if (busqueda.isNotBlank()) {
+                    EstadoVacio(
+                        icono = Icons.Outlined.SearchOff,
+                        titulo = "Sin resultados",
+                        detalle = "Ninguna publicación coincide con «${busqueda.trim()}». Prueba con otra palabra.",
+                        modifier = contenido
+                    )
+                } else {
+                    EstadoVacio(
+                        icono = Icons.Outlined.Forum,
+                        titulo = "Aún no hay publicaciones",
+                        detalle = "Sé el primero en compartir algo con tu campus.",
+                        modifier = contenido
                     )
                 }
             } else {
                 LazyColumn(
                     modifier = contenido,
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    item {
+                        Text(
+                            text = if (filtro == null) "Últimas publicaciones" else "Publicaciones de ${nombreAutor(filtro!!, autores)}",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
                     items(e.datos, key = { it.id }) { post ->
                         TarjetaPost(
-                            autor = nombreAutor(post.userId, autores),
-                            usuario = autores[post.userId]?.username.orEmpty(),
+                            autor = if (post.propio) "Tú" else nombreAutor(post.userId, autores),
+                            usuario = if (post.propio) "Publicado desde este celular" else "@" + autores[post.userId]?.username.orEmpty(),
                             titulo = post.title.comoTitulo(),
                             cuerpo = post.body.comoParrafo(),
+                            propio = post.propio,
                             onClick = { onAbrir(post.id) }
                         )
                     }
@@ -177,7 +197,7 @@ private fun PieDeLista(
             .padding(vertical = 8.dp)
     ) {
         Text(
-            text = "Mostrando $mostrando publicaciones",
+            text = if (mostrando == 1) "Mostrando 1 publicación" else "Mostrando $mostrando publicaciones",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

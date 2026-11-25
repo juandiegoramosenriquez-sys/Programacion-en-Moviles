@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity() {
                                             withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) { append("Muro") }
                                             withStyle(SpanStyle(color = MaterialTheme.colorScheme.tertiary)) { append("Campus") }
                                         },
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.SemiBold
                                     )
                                 }
                             },

@@ -79,6 +79,8 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private fun cargarAutores() {
         if (_autores.value.isNotEmpty()) return
         viewModelScope.launch {
+            val guardados = repo.usuariosGuardados()
+            if (guardados.isNotEmpty()) _autores.value = guardados.associateBy { it.id }
             repo.usuarios().onSuccess { lista -> _autores.value = lista.associateBy { it.id } }
         }
     }
@@ -96,7 +98,8 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
                 .onSuccess {
                     _lista.value = UiState.Exito(it.posts)
                     _sinConexion.value = it.desdeCache
-                    _hayMas.value = userId == null && !it.desdeCache && it.posts.size == TAMANO_PAGINA
+                    _hayMas.value = userId == null && !it.desdeCache &&
+                        it.posts.count { post -> !post.propio } == TAMANO_PAGINA
                 }
                 .onFailure {
                     _lista.value = UiState.Error(mensajeDe(it))
@@ -112,7 +115,7 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         trabajoLista = viewModelScope.launch {
             _cargandoMas.value = true
             _errorMas.value = null
-            repo.pagina(actual.datos.size, TAMANO_PAGINA)
+            repo.pagina(actual.datos.count { !it.propio }, TAMANO_PAGINA)
                 .onSuccess { nuevos ->
                     val idsActuales = actual.datos.map { it.id }.toSet()
                     _lista.value = UiState.Exito(actual.datos + nuevos.posts.filterNot { it.id in idsActuales })
@@ -136,7 +139,14 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         viewModelScope.launch {
             _creado.value = UiState.Cargando
             repo.crear(NuevoPost(userId = 1, title = titulo, body = texto))
-                .onSuccess { _creado.value = UiState.Exito(it) }
+                .onSuccess { nuevo ->
+                    val actual = _lista.value
+                    val filtro = _usuarioFiltro.value
+                    if (actual is UiState.Exito && (filtro == null || filtro == nuevo.userId)) {
+                        _lista.value = UiState.Exito(listOf(nuevo) + actual.datos)
+                    }
+                    _creado.value = UiState.Exito(nuevo)
+                }
                 .onFailure { _creado.value = UiState.Error(mensajeDe(it)) }
         }
     }

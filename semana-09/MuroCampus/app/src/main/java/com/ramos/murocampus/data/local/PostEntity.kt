@@ -9,9 +9,10 @@ data class PostEntity(
     @PrimaryKey val id: Int,
     val userId: Int,
     val title: String,
-    val body: String
+    val body: String,
+    val propio: Boolean = false
 )
 
-fun PostEntity.aPost(): Post = Post(userId = userId, id = id, title = title, body = body)
+fun PostEntity.aPost(): Post = Post(userId = userId, id = id, title = title, body = body, propio = propio)
 
-fun Post.aEntity(): PostEntity = PostEntity(id = id, userId = userId, title = title, body = body)
+fun Post.aEntity(): PostEntity = PostEntity(id = id, userId = userId, title = title, body = body, propio = propio)
