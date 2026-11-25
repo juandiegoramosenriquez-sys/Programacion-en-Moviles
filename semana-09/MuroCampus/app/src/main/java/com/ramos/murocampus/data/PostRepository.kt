@@ -15,6 +15,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 interface PostRepository {
     suspend fun listar(): Result<Listado>
+    suspend fun pagina(inicio: Int, cantidad: Int): Result<Listado>
     suspend fun detalle(id: Int): Result<Post>
     suspend fun comentarios(id: Int): Result<List<Comentario>>
     suspend fun porUsuario(userId: Int): Result<Listado>
@@ -30,6 +31,12 @@ class PostRepositoryRemote(
 
     override suspend fun listar(): Result<Listado> =
         conCache(remoto = { api.listar() }, local = { dao.todos() })
+
+    override suspend fun pagina(inicio: Int, cantidad: Int): Result<Listado> =
+        conCache(
+            remoto = { api.pagina(inicio, cantidad) },
+            local = { if (inicio == 0) dao.todos() else emptyList() }
+        )
 
     override suspend fun detalle(id: Int): Result<Post> = llamar { api.detalle(id) }
 

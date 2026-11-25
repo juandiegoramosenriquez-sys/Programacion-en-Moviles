@@ -7,13 +7,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -33,6 +37,9 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
     val filtro by vm.usuarioFiltro.collectAsStateWithLifecycle()
     val busqueda by vm.busqueda.collectAsStateWithLifecycle()
     val sinConexion by vm.sinConexion.collectAsStateWithLifecycle()
+    val hayMas by vm.hayMas.collectAsStateWithLifecycle()
+    val cargandoMas by vm.cargandoMas.collectAsStateWithLifecycle()
+    val errorMas by vm.errorMas.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         OutlinedTextField(
@@ -95,7 +102,7 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
             } else {
                 LazyColumn(
                     modifier = contenido,
-                    contentPadding = PaddingValues(16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(e.datos, key = { it.id }) { post ->
@@ -106,6 +113,58 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
                             onClick = { onAbrir(post.id) }
                         )
                     }
+                    item {
+                        PieDeLista(
+                            mostrando = e.datos.size,
+                            hayMas = hayMas && busqueda.isBlank(),
+                            cargandoMas = cargandoMas,
+                            errorMas = errorMas,
+                            onCargarMas = { vm.cargarMas() }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PieDeLista(
+    mostrando: Int,
+    hayMas: Boolean,
+    cargandoMas: Boolean,
+    errorMas: String?,
+    onCargarMas: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(
+            text = "Mostrando $mostrando publicaciones",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        if (errorMas != null) {
+            Text(
+                text = errorMas,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+        if (hayMas) {
+            OutlinedButton(
+                onClick = onCargarMas,
+                enabled = !cargandoMas,
+                modifier = Modifier.padding(top = 8.dp)
+            ) {
+                if (cargandoMas) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                } else {
+                    Text(if (errorMas != null) "Reintentar" else "Cargar 20 más")
                 }
             }
         }

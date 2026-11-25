@@ -18,6 +18,9 @@ interface PostApi {
     @GET("posts")
     suspend fun listar(): List<Post>
 
+    @GET("posts")
+    suspend fun pagina(@Query("_start") inicio: Int, @Query("_limit") cantidad: Int): List<Post>
+
     @GET("posts/{id}")
     suspend fun detalle(@Path("id") id: Int): Post
 

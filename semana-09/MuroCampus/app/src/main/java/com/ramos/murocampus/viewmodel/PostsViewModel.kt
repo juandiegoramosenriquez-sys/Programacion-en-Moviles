@@ -56,6 +56,15 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _editado = MutableStateFlow<UiState<Post>?>(null)
     val editado: StateFlow<UiState<Post>?> = _editado.asStateFlow()
 
+    private val _hayMas = MutableStateFlow(false)
+    val hayMas: StateFlow<Boolean> = _hayMas.asStateFlow()
+
+    private val _cargandoMas = MutableStateFlow(false)
+    val cargandoMas: StateFlow<Boolean> = _cargandoMas.asStateFlow()
+
+    private val _errorMas = MutableStateFlow<String?>(null)
+    val errorMas: StateFlow<String?> = _errorMas.asStateFlow()
+
     private var trabajoLista: Job? = null
     private var trabajoDetalle: Job? = null
 
@@ -66,19 +75,44 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     fun cargar() {
         val userId = _usuarioFiltro.value
         trabajoLista?.cancel()
+        _cargandoMas.value = false
+        _errorMas.value = null
         trabajoLista = viewModelScope.launch {
             _lista.value = UiState.Cargando
-            val resultado = if (userId == null) repo.listar() else repo.porUsuario(userId)
+            val resultado = if (userId == null) repo.pagina(0, TAMANO_PAGINA) else repo.porUsuario(userId)
             resultado
                 .onSuccess {
                     _lista.value = UiState.Exito(it.posts)
                     _sinConexion.value = it.desdeCache
+                    _hayMas.value = userId == null && !it.desdeCache && it.posts.size == TAMANO_PAGINA
                 }
                 .onFailure {
                     _lista.value = UiState.Error(mensajeDe(it))
                     _sinConexion.value = false
+                    _hayMas.value = false
                 }
         }
+    }
+
+    fun cargarMas() {
+        val actual = _lista.value
+        if (actual !is UiState.Exito || _cargandoMas.value || !_hayMas.value) return
+        trabajoLista = viewModelScope.launch {
+            _cargandoMas.value = true
+            _errorMas.value = null
+            repo.pagina(actual.datos.size, TAMANO_PAGINA)
+                .onSuccess { nuevos ->
+                    val idsActuales = actual.datos.map { it.id }.toSet()
+                    _lista.value = UiState.Exito(actual.datos + nuevos.posts.filterNot { it.id in idsActuales })
+                    _hayMas.value = !nuevos.desdeCache && nuevos.posts.size == TAMANO_PAGINA
+                }
+                .onFailure { _errorMas.value = mensajeDe(it) }
+            _cargandoMas.value = false
+        }
+    }
+
+    companion object {
+        const val TAMANO_PAGINA = 20
     }
 
     fun filtrar(userId: Int?) {
