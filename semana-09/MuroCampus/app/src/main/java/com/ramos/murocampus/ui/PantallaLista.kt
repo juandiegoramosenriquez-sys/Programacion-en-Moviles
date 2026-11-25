@@ -5,13 +5,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,8 +28,24 @@ import com.ramos.murocampus.viewmodel.UiState
 fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier = Modifier) {
     val estado by vm.lista.collectAsStateWithLifecycle()
     val filtro by vm.usuarioFiltro.collectAsStateWithLifecycle()
+    val busqueda by vm.busqueda.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { vm.buscar(it) },
+            placeholder = { Text("Buscar por título") },
+            singleLine = true,
+            trailingIcon = {
+                if (busqueda.isNotEmpty()) {
+                    TextButton(onClick = { vm.buscar("") }) { Text("Limpiar") }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp)
+        )
+
         FiltroUsuarios(seleccionado = filtro, onElegir = { vm.filtrar(it) })
 
         val contenido = Modifier
@@ -40,7 +59,10 @@ fun PantallaLista(vm: PostsViewModel, onAbrir: (Int) -> Unit, modifier: Modifier
             }
             is UiState.Exito -> if (e.datos.isEmpty()) {
                 Box(modifier = contenido, contentAlignment = Alignment.Center) {
-                    Text("Sin publicaciones")
+                    Text(
+                        if (busqueda.isNotBlank()) "Ninguna publicación coincide con «${busqueda.trim()}»"
+                        else "Sin publicaciones"
+                    )
                 }
             } else {
                 LazyColumn(
