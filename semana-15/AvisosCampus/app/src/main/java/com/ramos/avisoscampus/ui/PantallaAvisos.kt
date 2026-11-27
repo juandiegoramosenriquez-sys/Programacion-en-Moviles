@@ -7,57 +7,89 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.AirplanemodeActive
+import androidx.compose.material.icons.rounded.BatteryChargingFull
+import androidx.compose.material.icons.rounded.DarkMode
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.Shield
+import androidx.compose.material.icons.rounded.Timer
+import androidx.compose.material.icons.rounded.Tune
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import com.ramos.avisoscampus.model.Aviso
 import com.ramos.avisoscampus.model.PermisoUi
 import com.ramos.avisoscampus.notificacion.Notificador
 import com.ramos.avisoscampus.receiver.CargadorReceiver
 import com.ramos.avisoscampus.receiver.ModoAvionReceiver
+import com.ramos.avisoscampus.ui.theme.LocalPaleta
 import com.ramos.avisoscampus.viewmodel.AvisosViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+private data class Pestana(val titulo: String, val icono: ImageVector)
+
+private val pestanas = listOf(
+    Pestana("Inicio", Icons.Outlined.Home),
+    Pestana("Historial", Icons.Outlined.History),
+    Pestana("Ajustes", Icons.Outlined.Settings)
+)
+
 @Composable
-fun PantallaAvisos(vm: AvisosViewModel) {
+fun PantallaAvisos(vm: AvisosViewModel, oscuro: Boolean, alCambiarTema: (Boolean) -> Unit) {
     val contexto = LocalContext.current
+    val p = LocalPaleta.current
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val escuchandoCargador by vm.escuchandoCargador.collectAsState()
     val avisos by vm.avisos.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
+    var pestana by rememberSaveable { mutableIntStateOf(0) }
 
     DisposableEffect(escuchando) {
         if (escuchando) {
@@ -73,8 +105,6 @@ fun PantallaAvisos(vm: AvisosViewModel) {
             onDispose { }
         }
     }
-
-    val escuchandoCargador by vm.escuchandoCargador.collectAsState()
 
     DisposableEffect(escuchandoCargador) {
         if (escuchandoCargador) {
@@ -107,15 +137,40 @@ fun PantallaAvisos(vm: AvisosViewModel) {
         }
     }
 
+    val pedirPermiso = {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            vm.permisoRespondido(true)
+        }
+    }
+    val abrirAjustes = {
+        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, contexto.packageName)
+        contexto.startActivity(intent)
+    }
+
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("AvisosCampus") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
+        containerColor = p.fondo,
+        topBar = { Cabecera(cantidad = avisos.size, alTocarCampana = { pestana = 1 }) },
+        bottomBar = {
+            NavigationBar(containerColor = p.tarjeta, tonalElevation = 0.dp) {
+                pestanas.forEachIndexed { i, item ->
+                    NavigationBarItem(
+                        selected = pestana == i,
+                        onClick = { pestana = i },
+                        icon = { Icon(item.icono, contentDescription = null) },
+                        label = { Text(item.titulo) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = p.textoBoton,
+                            selectedTextColor = p.texto,
+                            indicatorColor = p.boton,
+                            unselectedIconColor = p.textoSecundario,
+                            unselectedTextColor = p.textoSecundario
+                        )
+                    )
+                }
+            }
         }
     ) { padding ->
         Column(
@@ -123,153 +178,287 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Tarjeta("Permiso de notificaciones") {
-                EtiquetaPermiso(permiso)
-                Button(onClick = {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    } else {
-                        vm.permisoRespondido(true)
-                    }
-                }) {
-                    Text("Permitir notificaciones")
-                }
-            }
-            mensaje?.let { texto ->
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        text = texto,
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(12.dp)
-                    )
-                }
-                OutlinedButton(
-                    onClick = {
-                        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-                            .putExtra(Settings.EXTRA_APP_PACKAGE, contexto.packageName)
-                        contexto.startActivity(intent)
-                    },
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text("Abrir ajustes")
-                }
-            }
-            Tarjeta("Avisos") {
-                Button(onClick = { vm.avisarAhora() }) {
-                    Text("Mostrar aviso")
-                }
-            }
-            Tarjeta("Recordatorio") {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        onClick = { vm.recordarEn(10) },
-                        enabled = faltan == null
-                    ) {
-                        Text("Recordar en 10 s")
-                    }
-                    OutlinedButton(
-                        onClick = { vm.cancelarRecordatorio() },
-                        enabled = faltan != null
-                    ) {
-                        Text("Cancelar")
-                    }
-                }
-                faltan?.let {
-                    Text("Faltan $it s", fontWeight = FontWeight.Bold)
-                }
-            }
-            Tarjeta("Receptor de anuncios") {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Escuchar el modo avión")
-                    Switch(checked = escuchando, onCheckedChange = { vm.cambiarEscucha(it) })
-                }
-                Text(
-                    text = "Activa o desactiva el modo avión del celular",
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            when (pestana) {
+                0 -> Inicio(
+                    avisos = avisos,
+                    permiso = permiso,
+                    mensaje = mensaje,
+                    faltan = faltan,
+                    escuchando = escuchando,
+                    escuchandoCargador = escuchandoCargador,
+                    vm = vm,
+                    pedirPermiso = pedirPermiso,
+                    abrirAjustes = abrirAjustes,
+                    verTodo = { pestana = 1 }
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Escuchar el cargador")
-                    Switch(
-                        checked = escuchandoCargador,
-                        onCheckedChange = { vm.cambiarEscuchaCargador(it) }
-                    )
-                }
-                Text(
-                    text = "Conecta o desconecta el cargador del celular",
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                1 -> HistorialAvisos(avisos)
+                else -> Ajustes(oscuro, alCambiarTema, abrirAjustes)
             }
-            HistorialAvisos(avisos)
+            Spacer(Modifier.height(8.dp))
         }
     }
 }
 
 @Composable
-fun EtiquetaPermiso(permiso: PermisoUi) {
-    val (texto, color) = when (permiso) {
-        PermisoUi.SinPedir -> "Sin pedir" to Color(0xFF757575)
-        PermisoUi.Concedido -> "Permitido" to Color(0xFF2E7D32)
-        PermisoUi.Denegado -> "Denegado" to Color(0xFFC62828)
-    }
+private fun Cabecera(cantidad: Int, alTocarCampana: () -> Unit) {
+    val p = LocalPaleta.current
     Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(p.fondo)
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text("Estado:", style = MaterialTheme.typography.bodyMedium)
-        Surface(color = color.copy(alpha = 0.15f), shape = RoundedCornerShape(50)) {
-            Text(
-                text = texto,
-                color = color,
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-            )
+        Monograma()
+        Column(modifier = Modifier.weight(1f)) {
+            Text("AvisosCampus", style = MaterialTheme.typography.titleLarge, color = p.texto)
+            Text("Tu centro de avisos", style = MaterialTheme.typography.bodySmall, color = p.textoSecundario)
+        }
+        IconButton(onClick = alTocarCampana) {
+            BadgedBox(badge = {
+                if (cantidad > 0) {
+                    Badge(containerColor = p.morado, contentColor = p.tarjeta) {
+                        Text(if (cantidad > 99) "99+" else cantidad.toString())
+                    }
+                }
+            }) {
+                Icon(Icons.Rounded.Notifications, contentDescription = "Ver historial", tint = p.texto)
+            }
         }
     }
 }
 
 @Composable
-fun Tarjeta(titulo: String, contenido: @Composable ColumnScope.() -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+private fun Inicio(
+    avisos: List<Aviso>,
+    permiso: PermisoUi,
+    mensaje: String?,
+    faltan: Int?,
+    escuchando: Boolean,
+    escuchandoCargador: Boolean,
+    vm: AvisosViewModel,
+    pedirPermiso: () -> Unit,
+    abrirAjustes: () -> Unit,
+    verTodo: () -> Unit
+) {
+    val p = LocalPaleta.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(p.portada, RoundedCornerShape(20.dp))
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Text(
+            text = "AVISOS REGISTRADOS · ${avisos.size}",
+            style = MaterialTheme.typography.labelSmall,
+            color = p.textoPortada.copy(alpha = 0.6f)
+        )
+        Text(
+            text = "Tu campus,\nsiempre al día.",
+            style = MaterialTheme.typography.headlineSmall,
+            color = p.textoPortada
+        )
+        Text(
+            text = "Envía un aviso de prueba y míralo llegar al panel de notificaciones.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = p.textoPortada.copy(alpha = 0.7f)
+        )
+        BotonPrincipal(
+            texto = "Mostrar aviso",
+            onClick = { vm.avisarAhora() },
+            icono = Icons.Rounded.NotificationsActive,
+            fondo = p.textoPortada,
+            contenidoColor = p.portada
+        )
+    }
+
+    Tarjeta("Permiso de notificaciones", icono = Icons.Rounded.Shield) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text("Estado", style = MaterialTheme.typography.bodyMedium, color = p.textoSecundario)
+            when (permiso) {
+                PermisoUi.SinPedir -> Pildora("Sin pedir", p.etiquetaNeutra)
+                PermisoUi.Concedido -> Pildora("Permitido", p.etiquetaAvion)
+                PermisoUi.Denegado -> Pildora("Denegado", p.etiquetaError)
+            }
+        }
+        BotonBorde("Permitir notificaciones", onClick = pedirPermiso, modifier = Modifier.fillMaxWidth())
+    }
+
+    mensaje?.let { texto ->
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .background(p.etiquetaError.fondo, RoundedCornerShape(16.dp))
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = titulo,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                text = texto,
+                color = p.etiquetaError.texto,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
             )
-            contenido()
+            BotonPrincipal(
+                texto = "Abrir ajustes",
+                onClick = abrirAjustes,
+                fondo = p.rojo,
+                contenidoColor = p.tarjeta
+            )
         }
     }
+
+    Tarjeta("Recordatorio", icono = Icons.Rounded.Timer) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            AnilloCuenta(faltan)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                BotonPrincipal(
+                    texto = "Recordar en 10 s",
+                    onClick = { vm.recordarEn(10) },
+                    enabled = faltan == null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                BotonBorde(
+                    texto = "Cancelar",
+                    onClick = { vm.cancelarRecordatorio() },
+                    enabled = faltan != null,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+    }
+
+    Tarjeta("Receptor de anuncios", icono = Icons.Rounded.Tune) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Mosaico(
+                icono = Icons.Rounded.AirplanemodeActive,
+                titulo = "Escuchar el modo avión",
+                detalle = "Activa o desactiva el modo avión",
+                activo = escuchando,
+                alCambiar = { vm.cambiarEscucha(it) },
+                modifier = Modifier.weight(1f)
+            )
+            Mosaico(
+                icono = Icons.Rounded.BatteryChargingFull,
+                titulo = "Escuchar el cargador",
+                detalle = "Conecta o desconecta el cargador",
+                activo = escuchandoCargador,
+                alCambiar = { vm.cambiarEscuchaCargador(it) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+
+    HistorialAvisos(
+        avisos = avisos,
+        titulo = "Últimos avisos",
+        limite = 3,
+        accion = {
+            if (avisos.size > 3) {
+                TextButton(onClick = verTodo) { Text("Ver todo", color = p.texto) }
+            }
+        }
+    )
+}
+
+@Composable
+private fun Mosaico(
+    icono: ImageVector,
+    titulo: String,
+    detalle: String,
+    activo: Boolean,
+    alCambiar: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val p = LocalPaleta.current
+    Column(
+        modifier = modifier
+            .background(if (activo) p.etiquetaAvion.fondo else p.fondo, RoundedCornerShape(14.dp))
+            .border(1.dp, p.borde, RoundedCornerShape(14.dp))
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(p.tarjeta, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icono, contentDescription = null, tint = if (activo) p.verde else p.texto, modifier = Modifier.size(18.dp))
+            }
+            Switch(checked = activo, onCheckedChange = alCambiar, colors = coloresSwitch())
+        }
+        Text(titulo, style = MaterialTheme.typography.labelLarge, color = p.texto)
+        Text(detalle, style = MaterialTheme.typography.bodySmall, color = p.textoSecundario)
+    }
+}
+
+@Composable
+private fun Ajustes(oscuro: Boolean, alCambiarTema: (Boolean) -> Unit, abrirAjustes: () -> Unit) {
+    val p = LocalPaleta.current
+    Tarjeta("Apariencia", icono = Icons.Rounded.DarkMode) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Modo oscuro", style = MaterialTheme.typography.bodyLarge, color = p.texto)
+                Text("Fondo negro con texto claro", style = MaterialTheme.typography.bodySmall, color = p.textoSecundario)
+            }
+            Switch(checked = oscuro, onCheckedChange = alCambiarTema, colors = coloresSwitch())
+        }
+    }
+    Tarjeta("Notificaciones", icono = Icons.Rounded.Notifications) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Canal Avisos", style = MaterialTheme.typography.bodyMedium, color = p.texto)
+            Pildora("Normal", p.etiquetaCargador)
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text("Canal Urgentes", style = MaterialTheme.typography.bodyMedium, color = p.texto)
+            Pildora("Emergente", p.etiquetaBoton)
+        }
+        BotonBorde("Abrir ajustes de notificaciones", onClick = abrirAjustes, modifier = Modifier.fillMaxWidth())
+    }
+    Text(
+        text = "AvisosCampus 1.0 · Laboratorio 15",
+        style = MaterialTheme.typography.bodySmall,
+        color = p.textoSecundario,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center
+    )
 }

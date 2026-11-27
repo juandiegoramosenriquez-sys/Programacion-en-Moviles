@@ -49,6 +49,7 @@ object Notificador {
         val prioridad = if (aviso.urgente) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
         val constructor = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
+            .setColor(0xFF4A2C75.toInt())
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
             .setStyle(NotificationCompat.BigTextStyle().bigText(textoLargo(aviso)))

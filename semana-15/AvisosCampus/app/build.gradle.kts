@@ -60,6 +60,9 @@ dependencies {
     // Compilador de Room: genera el DAO y la base de datos
     ksp("androidx.room:room-compiler:2.8.5")
 
+    // Iconos de Material (redondeados y de contorno) para el rediseno
+    implementation("androidx.compose.material:material-icons-extended")
+
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

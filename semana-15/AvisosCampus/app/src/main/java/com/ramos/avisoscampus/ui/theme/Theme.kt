@@ -5,27 +5,44 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Azul80,
-    secondary = AzulGris80,
-    tertiary = Celeste80
-)
+val LocalPaleta = staticCompositionLocalOf { PaletaClara }
 
-private val LightColorScheme = lightColorScheme(
-    primary = Azul40,
-    secondary = AzulGris40,
-    tertiary = Celeste40
-)
+private fun esquema(p: Paleta, oscuro: Boolean) = if (oscuro) {
+    darkColorScheme(
+        primary = p.boton, onPrimary = p.textoBoton,
+        secondary = p.verde, tertiary = p.morado,
+        background = p.fondo, onBackground = p.texto,
+        surface = p.tarjeta, onSurface = p.texto,
+        surfaceVariant = p.tarjeta, onSurfaceVariant = p.textoSecundario,
+        outline = p.borde, outlineVariant = p.borde,
+        error = p.rojo, errorContainer = p.etiquetaError.fondo, onErrorContainer = p.etiquetaError.texto
+    )
+} else {
+    lightColorScheme(
+        primary = p.boton, onPrimary = p.textoBoton,
+        secondary = p.verde, tertiary = p.morado,
+        background = p.fondo, onBackground = p.texto,
+        surface = p.tarjeta, onSurface = p.texto,
+        surfaceVariant = p.tarjeta, onSurfaceVariant = p.textoSecundario,
+        outline = p.borde, outlineVariant = p.borde,
+        error = p.rojo, errorContainer = p.etiquetaError.fondo, onErrorContainer = p.etiquetaError.texto
+    )
+}
 
 @Composable
 fun AvisosCampusTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    MaterialTheme(
-        colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme,
-        typography = Typography,
-        content = content
-    )
+    val paleta = if (darkTheme) PaletaOscura else PaletaClara
+    CompositionLocalProvider(LocalPaleta provides paleta) {
+        MaterialTheme(
+            colorScheme = esquema(paleta, darkTheme),
+            typography = Typography,
+            content = content
+        )
+    }
 }
