@@ -74,5 +74,6 @@ object Notificador {
         Origen.BOTON -> "${aviso.texto}. Tu docente ya puede revisar tu trabajo; si necesitas corregir algo, vuelve a subir tus cambios antes del cierre."
         Origen.RECORDATORIO -> "${aviso.texto}: termina los pasos que faltan, toma las capturas en el emulador y sube tus commits a GitHub antes de la fecha de entrega."
         Origen.MODO_AVION -> "Modo avión ${aviso.texto.lowercase()}. Mientras esté activo no tendrás internet, pero los avisos locales de AvisosCampus seguirán llegando."
+        Origen.CARGADOR -> "Cargador ${aviso.texto.lowercase()}. AvisosCampus registró el cambio en tu historial para que sepas cuándo conectaste o desconectaste el celular."
     }
 }

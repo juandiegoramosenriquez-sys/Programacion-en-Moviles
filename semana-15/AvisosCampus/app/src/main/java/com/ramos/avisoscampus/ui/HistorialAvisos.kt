@@ -68,6 +68,7 @@ fun EtiquetaOrigen(origen: Origen) {
         Origen.BOTON -> Color(0xFF1565C0)
         Origen.RECORDATORIO -> Color(0xFFF59E0B)
         Origen.MODO_AVION -> Color(0xFF00897B)
+        Origen.CARGADOR -> Color(0xFF455A64)
     }
     Surface(color = color, shape = RoundedCornerShape(50)) {
         Text(
