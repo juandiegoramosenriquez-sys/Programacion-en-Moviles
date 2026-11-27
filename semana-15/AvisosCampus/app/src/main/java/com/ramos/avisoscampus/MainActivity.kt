@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AvisosCampusTheme {
-                val vm: AvisosViewModel = viewModel(factory = AvisosViewModelFactory())
+                val vm: AvisosViewModel = viewModel(factory = AvisosViewModelFactory(applicationContext))
                 PantallaAvisos(vm)
             }
         }
