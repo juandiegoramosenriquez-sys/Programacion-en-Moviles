@@ -9,16 +9,27 @@ import com.ramos.avisoscampus.model.PermisoUi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
+class AvisosViewModel(
+    private val repo: AvisosRepository,
+    posponer: Flow<Unit> = emptyFlow()
+) : ViewModel() {
 
     val avisos: StateFlow<List<Aviso>> = repo.avisos
+
+    init {
+        viewModelScope.launch {
+            posponer.collect { recordarEn(10) }
+        }
+    }
 
     private val _eventos = MutableSharedFlow<Aviso>()
     val eventos: SharedFlow<Aviso> = _eventos.asSharedFlow()

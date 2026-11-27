@@ -16,6 +16,7 @@ import com.ramos.avisoscampus.MainActivity
 import com.ramos.avisoscampus.R
 import com.ramos.avisoscampus.model.Aviso
 import com.ramos.avisoscampus.model.Origen
+import com.ramos.avisoscampus.receiver.PosponerReceiver
 
 object Notificador {
 
@@ -46,7 +47,7 @@ object Notificador {
         val pendiente = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         val canal = if (aviso.urgente) CANAL_URGENTE else CANAL
         val prioridad = if (aviso.urgente) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
-        val notificacion = NotificationCompat.Builder(context, canal)
+        val constructor = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
@@ -54,8 +55,18 @@ object Notificador {
             .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true)
-            .build()
-        NotificationManagerCompat.from(context).notify(aviso.id, notificacion)
+        if (aviso.origen == Origen.RECORDATORIO) {
+            val intentPosponer = Intent(context, PosponerReceiver::class.java)
+                .putExtra(PosponerReceiver.EXTRA_ID, aviso.id)
+            val posponer = PendingIntent.getBroadcast(
+                context,
+                aviso.id,
+                intentPosponer,
+                PendingIntent.FLAG_IMMUTABLE
+            )
+            constructor.addAction(R.drawable.ic_notificacion, "Posponer 10 s", posponer)
+        }
+        NotificationManagerCompat.from(context).notify(aviso.id, constructor.build())
         return true
     }
 
