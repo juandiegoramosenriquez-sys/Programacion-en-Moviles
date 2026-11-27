@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import com.ramos.avisoscampus.MainActivity
 import com.ramos.avisoscampus.R
 import com.ramos.avisoscampus.model.Aviso
+import com.ramos.avisoscampus.model.Origen
 
 object Notificador {
 
@@ -49,11 +50,18 @@ object Notificador {
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(textoLargo(aviso)))
             .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(context).notify(aviso.id, notificacion)
         return true
+    }
+
+    private fun textoLargo(aviso: Aviso): String = when (aviso.origen) {
+        Origen.BOTON -> "${aviso.texto}. Tu docente ya puede revisar tu trabajo; si necesitas corregir algo, vuelve a subir tus cambios antes del cierre."
+        Origen.RECORDATORIO -> "${aviso.texto}: termina los pasos que faltan, toma las capturas en el emulador y sube tus commits a GitHub antes de la fecha de entrega."
+        Origen.MODO_AVION -> "Modo avión ${aviso.texto.lowercase()}. Mientras esté activo no tendrás internet, pero los avisos locales de AvisosCampus seguirán llegando."
     }
 }
